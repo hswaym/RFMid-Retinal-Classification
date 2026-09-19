@@ -3,7 +3,7 @@ model:
   name: "hqnn_4qubit"
   backbone: "resnet18"
   pretrained_backbone: true
-  freeze_backbone: false
+  freeze_backbone: true
   compression_method: "linear"  # 'linear', 'autoencoder', or 'pca'
   in_features: 512
   num_classes: 5
