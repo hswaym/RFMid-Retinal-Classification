@@ -88,12 +88,18 @@ class HybridQuantumCNN(nn.Module):
         """Executes the pipeline starting from pre-extracted 512-d features.
 
         Enables fast quantum training loops without recomputing image convolutions.
+        Handles device bridging between classical PyTorch modules (GPU/CUDA)
+        and PennyLane simulator devices (e.g. default.qubit on CPU).
         """
         # Compress to quantum rotation angles in [-pi, pi]
         angles = self.compressor(features)
 
-        # Quantum expectation value measurement
-        q_out = self.quantum_layer(angles)
+        # Move to CPU for PennyLane quantum simulation
+        angles_cpu = angles.cpu()
+        q_out = self.quantum_layer(angles_cpu)
+
+        # Transfer back to original device before classical classification head
+        q_out = q_out.to(features.device)
 
         # Final linear classification head
         logits = self.head(q_out)
