@@ -1,0 +1,27 @@
+# Configuration for 4-Qubit Autoencoder Hybrid Model (ResNet18 + Autoencoder + PennyLane PQC)
+model:
+  name: "hqnn_4qubit_autoencoder"
+  backbone: "resnet18"
+  pretrained_backbone: true
+  freeze_backbone: true
+  compression_method: "autoencoder"  # 'linear', 'autoencoder', or 'pca'
+  compressor_checkpoint: "checkpoints/autoencoder_4qubit.pt"
+  in_features: 512
+  num_classes: 5
+  dropout: 0.2
+
+quantum:
+  n_qubits: 4
+  n_layers: 1
+  device: "default.qubit"
+  shots: null
+  ansatz: "strongly_entangling"
+  feature_map: "angle_y"
+
+training:
+  epochs: 15
+  batch_size: 16
+  lr: 0.0001
+  focal_gamma: 2.0
+  patience: 5
+  wandb_project: "hqnn-retinal-classification"

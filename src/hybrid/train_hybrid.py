@@ -312,6 +312,77 @@ def run_hybrid_training(
         val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False, num_workers=0)
         test_loader = DataLoader(te_ds, batch_size=batch_sz, shuffle=False, num_workers=0)
 
+    # Ensure Compressor is pre-trained or fitted if required (Autoencoder / PCA)
+    if model.compression_method == "autoencoder":
+        from src.compression.autoencoder import FeatureAutoencoder, train_autoencoder
+        ae_checkpoint = Path(f"checkpoints/autoencoder_{model.n_qubits}qubit.pt")
+        needs_training = not ae_checkpoint.exists()
+        if not needs_training:
+            try:
+                ckpt = torch.load(ae_checkpoint, map_location="cpu")
+                if ckpt.get("n_samples", 0) < len(train_df):
+                    needs_training = True
+                else:
+                    FeatureAutoencoder.load(ae_checkpoint)
+            except Exception:
+                needs_training = True
+
+        if needs_training and is_feature_mode:
+            print(f">> Pre-training FeatureAutoencoder ({model.n_qubits}-d latent) on {len(tr_ds)} feature vectors...")
+            ae = FeatureAutoencoder(in_features=512, latent_dim=model.n_qubits, scale_pi=True)
+            train_autoencoder(
+                ae,
+                train_features=tr_ds.tensors[0],
+                val_features=val_ds.tensors[0],
+                epochs=15,
+                batch_size=32,
+                save_path=ae_checkpoint,
+                device=str(device),
+            )
+            ckpt = torch.load(ae_checkpoint, map_location="cpu")
+            ckpt["n_samples"] = len(tr_ds)
+            torch.save(ckpt, ae_checkpoint)
+            print(f">> Saved trained autoencoder ({len(tr_ds)} samples) to {ae_checkpoint}")
+
+        from src.compression import get_compressor
+        model.compressor = get_compressor(
+            method="autoencoder",
+            in_features=512,
+            n_qubits=model.n_qubits,
+            checkpoint_path=ae_checkpoint,
+        ).to(device)
+
+    elif model.compression_method == "pca":
+        from src.compression.pca_compressor import PCACompressor
+        pca_checkpoint = Path(f"checkpoints/pca_{model.n_qubits}qubit.joblib")
+        needs_fit = not pca_checkpoint.exists()
+        if not needs_fit:
+            try:
+                import joblib
+                pca_dict = joblib.load(pca_checkpoint)
+                if getattr(pca_dict.get("pca", None), "n_samples_", 0) < len(train_df):
+                    needs_fit = True
+            except Exception:
+                needs_fit = True
+
+        if needs_fit and is_feature_mode:
+            print(f">> Fitting PCA ({model.n_qubits} components) on {len(tr_ds)} training feature vectors...")
+            pca = PCACompressor(n_components=model.n_qubits, scale_pi=True)
+            pca.fit(tr_ds.tensors[0].numpy())
+            pca.save(pca_checkpoint)
+            print(f">> Saved fitted PCA to {pca_checkpoint}")
+
+        from src.compression import get_compressor
+        model.compressor = get_compressor(
+            method="pca",
+            in_features=512,
+            n_qubits=model.n_qubits,
+            checkpoint_path=pca_checkpoint,
+        ).to(device)
+
+    # Re-calculate parameter breakdown after compressor initialization
+    param_info = model.get_parameter_breakdown()
+
     # Optimization Setup
     # Train decision stage (compressor, quantum layer, and head)
     trainable_params = [p for p in model.parameters() if p.requires_grad]
@@ -325,7 +396,7 @@ def run_hybrid_training(
         import wandb
         wandb.init(
             project="hqnn-retinal-classification",
-            name=f"hqnn_{model.n_qubits}qubit_training",
+            name=f"hqnn_{model.n_qubits}qubit_{model.compression_method}_training",
             mode=wandb_mode,
             config={
                 "n_qubits": model.n_qubits,
@@ -345,7 +416,7 @@ def run_hybrid_training(
 
     checkpoints_dir = Path("checkpoints")
     checkpoints_dir.mkdir(exist_ok=True)
-    best_checkpoint_path = checkpoints_dir / f"hqnn_{model.n_qubits}qubit_best.pt"
+    best_checkpoint_path = checkpoints_dir / f"hqnn_{model.n_qubits}qubit_{model.compression_method}_best.pt"
 
     best_val_f1 = -1.0
     patience = 5
@@ -431,7 +502,7 @@ def run_hybrid_training(
     test_metrics["trainable_params"] = param_info["total_trainable"]
     test_metrics["quantum_params"] = param_info["quantum_trainable"]
 
-    print(f"\n================ FINAL TEST RESULTS: HQNN ({model.n_qubits}-QUBIT) ================")
+    print(f"\n================ FINAL TEST RESULTS: HQNN ({model.n_qubits}-QUBIT, {model.compression_method.upper()}) ================")
     print(f" Accuracy:            {test_metrics['accuracy'] * 100:.2f}%")
     print(f" Macro-F1:            {test_metrics['macro_f1']:.4f}")
     print(f" Quadratic Kappa:     {test_metrics['qwk']:.4f}")

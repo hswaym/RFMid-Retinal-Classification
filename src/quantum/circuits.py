@@ -79,6 +79,10 @@ def create_quantum_circuit(
     return circuit, weight_shapes
 
 
+# Alias for explicit API naming compatibility
+build_qnode = create_quantum_circuit
+
+
 def get_circuit_from_config(
     config_path: Union[str, Path],
 ) -> Tuple[Callable, Dict[str, Tuple[int, ...]], Dict[str, Any]]:
