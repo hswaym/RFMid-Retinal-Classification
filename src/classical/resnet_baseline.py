@@ -4,7 +4,8 @@ Provides a full 5-class classifier and a reusable truncated feature extractor
 returning 512-dimensional pooled embeddings for the hybrid quantum-classical pipeline.
 """
 
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Union
 import torch
 import torch.nn as nn
 from torchvision.models import ResNet18_Weights, resnet18
@@ -13,7 +14,12 @@ from torchvision.models import ResNet18_Weights, resnet18
 class ResNet18FeatureExtractor(nn.Module):
     """Truncated ResNet18 backbone outputting 512-dimensional feature vectors."""
 
-    def __init__(self, pretrained: bool = True, freeze_backbone: bool = False) -> None:
+    def __init__(
+        self,
+        pretrained: bool = True,
+        freeze_backbone: bool = False,
+        checkpoint_path: Optional[Union[str, Path]] = None,
+    ) -> None:
         super().__init__()
         weights = ResNet18_Weights.DEFAULT if pretrained else None
         base_model = resnet18(weights=weights)
@@ -30,6 +36,22 @@ class ResNet18FeatureExtractor(nn.Module):
         self.avgpool = base_model.avgpool
 
         self.feature_dim = 512
+
+        if checkpoint_path is not None:
+            ckpt_p = Path(checkpoint_path)
+            if ckpt_p.exists():
+                state = torch.load(ckpt_p, map_location="cpu")
+                state_dict = state.get("model_state_dict", state)
+                # Filter keys belonging to feature_extractor or base model
+                prefix = "feature_extractor."
+                filtered = {}
+                for k, v in state_dict.items():
+                    if k.startswith(prefix):
+                        filtered[k[len(prefix):]] = v
+                    elif not k.startswith("fc."):
+                        filtered[k] = v
+                self.load_state_dict(filtered, strict=False)
+                print(f"Loaded feature extractor weights from {ckpt_p}")
 
         if freeze_backbone:
             for param in self.parameters():
@@ -99,11 +121,13 @@ class ResNet18Baseline(nn.Module):
 def get_feature_extractor(
     pretrained: bool = True,
     freeze_backbone: bool = False,
+    checkpoint_path: Optional[Union[str, Path]] = None,
 ) -> ResNet18FeatureExtractor:
     """Returns truncated ResNet18 feature extractor (outputs 512-dim vector)."""
     return ResNet18FeatureExtractor(
         pretrained=pretrained,
         freeze_backbone=freeze_backbone,
+        checkpoint_path=checkpoint_path,
     )
 
 
