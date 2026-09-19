@@ -1,0 +1,26 @@
+# Configuration for 8-Qubit Hybrid Model (ResNet18 + Linear + PennyLane PQC)
+model:
+  name: "hqnn_8qubit"
+  backbone: "resnet18"
+  pretrained_backbone: true
+  freeze_backbone: false
+  compression_method: "linear"  # 'linear', 'autoencoder', or 'pca'
+  in_features: 512
+  num_classes: 5
+  dropout: 0.2
+
+quantum:
+  n_qubits: 8
+  n_layers: 1
+  device: "default.qubit"
+  shots: null
+  ansatz: "strongly_entangling"
+  feature_map: "angle_y"
+
+training:
+  epochs: 15
+  batch_size: 16
+  lr: 0.0001
+  focal_gamma: 2.0
+  patience: 5
+  wandb_project: "hqnn-retinal-classification"
