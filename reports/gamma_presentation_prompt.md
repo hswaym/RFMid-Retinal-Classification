@@ -84,24 +84,27 @@ Can shallow Parameterized Quantum Circuits (PQCs) operating in exponential Hilbe
 
 ---
 
-# Slide 6: Methodology
-**Clinical Preprocessing, Loss Optimization, & Quantum Formulations**
-### 1. Clinical Image Preprocessing Engine
-- **Ben Graham Circular Crop**: Automatically masks non-retinal black borders, identifies bounding contours, and centers the retina.
-- **Green-Channel CLAHE**: Isolates the 540–575 nm spectrum where human hemoglobin absorbs light, maximizing lesion contrast (clip_limit=2.0, tile_grid=(8,8)).
-- **Standardized Resize**: Standardizes images to $224 \times 224 \times 3$.
+# Slide 6: Methodology: Formulations & Optimization
+**Three-Pillar Technical Methodology & Mathematical Formulations**
+*(Layout: 3 distinct parallel columns/cards with color badges)*
 
-### 2. Class-Weighted Multi-Class Focal Loss
-$$\mathcal{L}_{\text{Focal}} = -\sum_{c=0}^4 y_c \cdot \alpha_c \cdot (1 - p_c)^\gamma \cdot \log(p_c)$$
-- $\gamma = 2.0$ suppresses gradients from easy, dominant Grade 0 images.
-- $\alpha_c = \frac{N}{C \cdot N_c}$ enforces a $9.3\times$ higher penalty on rare Grade 3 lesions.
+### Pillar 1: Preprocessing (Blue Card)
+- **Ben Graham Circular Crop**: Automatically masks non-retinal borders and centers the retina, removing camera artifacts.
+- **Green-Channel CLAHE**: Isolates the 540–575 nm spectrum where hemoglobin absorbs light, maximizing microaneurysm and hemorrhage contrast.
+- **Standardized Resize**: All fundus images normalized and bilinearly interpolated to $224 \times 224 \times 3$.
 
-### 3. Quantum State Preparation & Strongly Entangling Ansatz
-- **Angle Embedding**: $|\psi(z)\rangle = \bigotimes_{i=0}^{n-1} R_y(z_i) |0\rangle$ with constant $O(1)$ circuit depth.
-- **Variational Ansatz**: $U(\boldsymbol{\theta}) = \prod_{l=1}^L \left( U_{\text{ent}}^{(l)} \cdot \bigotimes_{i=0}^{n-1} R(\alpha_{l,i}, \beta_{l,i}, \gamma_{l,i}) \right)$ using 3 Euler rotations per qubit and a circular CNOT entangling ring.
-- **Parameter-Shift Rule**: Evaluates exact analytical gradients on quantum hardware:
-  $$\frac{\partial \langle Z_i \rangle}{\partial \theta_j} = \frac{\langle Z_i \rangle\left(\theta_j + \frac{\pi}{2}\right) - \langle Z_i \rangle\left(\theta_j - \frac{\pi}{2}\right)}{2}$$
-- **Quadratic Weighted Kappa (QWK)**: $\kappa = 1 - \frac{\sum w_{i,j} O_{i,j}}{\sum w_{i,j} E_{i,j}}$ where $w_{i,j} = \frac{(i - j)^2}{16}$.
+### Pillar 2: Loss Function (Purple Card)
+*We use Class-Weighted Focal Loss to combat severe class imbalance:*
+$$\mathcal{L} = -\sum_c \alpha_c y_c (1 - p_c)^\gamma \log(p_c)$$
+- **Gamma ($\gamma = 2.0$)**: Suppresses gradient contributions from easy, dominant majority classes (Grade 0).
+- **Alpha ($\alpha_c$)**: Enforces a $9.3\times$ higher gradient penalty on rare Grade 3 lesions ($\alpha_3 = 3.81$ vs $\alpha_0 = 0.41$).
+
+### Pillar 3: Quantum Layer & QWK (Teal Card)
+*A Strongly Entangling Ansatz $U(\boldsymbol{\theta})$ is trained via the Parameter-Shift Rule for exact analytical gradients on quantum hardware:*
+$$|0\rangle \longrightarrow R_y(\theta) \longrightarrow \text{CNOT Ring} \longrightarrow R_z(\theta) \longrightarrow \langle Z_i \rangle$$
+
+*Clinical agreement is measured with **Quadratic Weighted Kappa (QWK)**, which penalizes distant misclassifications quadratically:*
+$$\kappa = 1 - \frac{\sum_{i,j} w_{i,j} O_{i,j}}{\sum_{i,j} w_{i,j} E_{i,j}}, \quad w_{i,j} = \frac{(i - j)^2}{16} \quad (w_{0,4} = 1.0 \text{ vs. } w_{0,1} = 0.0625)$$
 
 ---
 

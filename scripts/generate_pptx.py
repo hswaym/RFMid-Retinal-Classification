@@ -342,42 +342,143 @@ def create_presentation(output_path: str):
         p.space_before = Pt(2)
 
     # =========================================================
-    # SLIDE 6: METHODOLOGY
+    # SLIDE 6: METHODOLOGY: FORMULATIONS & OPTIMIZATION
     # =========================================================
     slide6 = prs.slides.add_slide(blank_layout)
-    add_header(slide6, "Methodology: Clinical Preprocessing & Mathematical Formulations", "Technical Methodology")
+    add_header(slide6, "Methodology: Formulations & Optimization", "Technical Methodology & Mathematical Formulations")
 
-    math_cards = [
-        ("1. Clinical Preprocessing", "• Ben Graham Circular Crop: Automates contour thresholding, circular masking, and black margin removal.\n• Green-Channel CLAHE: Isolates 540-575nm spectrum where hemoglobin absorbs light, maximizing lesion contrast.\n• Bilinear Resize: Standardizes images to 224x224x3.", DARK_BLUE),
-        ("2. Class-Weighted Focal Loss", "L_Focal = -sum y_c * alpha_c * (1 - p_c)^gamma * log(p_c)\n\n• gamma = 2.0 suppresses easy majority-class gradients (Grade 0)\n• alpha_c = N / (C * N_c) enforces 9.3x higher penalty on rare Grade 3 lesions.", TEAL),
-        ("3. Quantum State Preparation", "|psi(z)> = (X)_{i=0}^{n-1} Ry(z_i) |0>\n\n• Continuous angles z_i in [-pi, pi] rotate qubits on Bloch sphere\n• Constant circuit depth O(1); zero multi-qubit CNOT overhead.", DARK_BLUE),
-        ("4. Strongly Entangling Ansatz", "U(theta) = Prod_{l=1}^L [ U_ent * (X) R(alpha, beta, gamma) ]\n\n• 3 Euler rotation angles per qubit: Rz(gamma) Ry(beta) Rx(alpha)\n• Periodic circular CNOT ring generates multi-qubit entanglement.", TEAL),
-        ("5. Parameter-Shift Rule", "d<Z_i>/dtheta_j = (<Z_i>(theta_j + pi/2) - <Z_i>(theta_j - pi/2)) / 2\n\n• Evaluates exact analytical gradients without intermediate state readout\n• Enables hardware-native backpropagation on physical QPUs.", DARK_BLUE),
-        ("6. Quadratic Weighted Kappa", "kappa = 1 - (sum w_ij O_ij) / (sum w_ij E_ij)\n\nw_ij = (i - j)^2 / (C - 1)^2 = (i - j)^2 / 16\n• Penalizes severe clinical misclassifications quadratically (w_0,4 = 1.0 vs w_0,1 = 0.0625).", TEAL)
+    # Column 1: Preprocessing (Blue Theme)
+    c1 = add_card(slide6, 0.8, 1.4, 3.65, 5.4, bg_color=WHITE, border_color=RGBColor(219, 234, 254))
+    h1_box = slide6.shapes.add_textbox(Inches(1.0), Inches(1.5), Inches(3.25), Inches(0.5))
+    tf_h1 = h1_box.text_frame
+    p_h1 = tf_h1.paragraphs[0]
+    p_h1.text = "❶  Preprocessing"
+    p_h1.font.size = Pt(17)
+    p_h1.font.bold = True
+    p_h1.font.color.rgb = DARK_BLUE
+
+    p1_items = [
+        ("Ben Graham Circular Crop", "Masks non-retinal borders and centers the image; removes dark margins and optical artifacts."),
+        ("Green-Channel CLAHE", "Maximizes lesion contrast in the 540–575 nm spectrum where hemoglobin absorbs light."),
+        ("Standardized Resize", "All images standardized and bilinearly interpolated to 224 × 224 × 3.")
     ]
+    tb_p1 = slide6.shapes.add_textbox(Inches(1.0), Inches(2.1), Inches(3.25), Inches(4.5))
+    tf_p1 = tb_p1.text_frame
+    tf_p1.word_wrap = True
+    for idx, (title, desc) in enumerate(p1_items):
+        if idx > 0:
+            p_t = tf_p1.add_paragraph()
+            p_t.space_before = Pt(14)
+        else:
+            p_t = tf_p1.paragraphs[0]
+        p_t.text = title
+        p_t.font.size = Pt(13)
+        p_t.font.bold = True
+        p_t.font.color.rgb = DARK_BLUE
+        
+        p_d = tf_p1.add_paragraph()
+        p_d.text = desc
+        p_d.font.size = Pt(11)
+        p_d.font.color.rgb = TEXT_MUTED
+        p_d.space_before = Pt(3)
 
-    for idx, (title, formula, color) in enumerate(math_cards):
-        row = idx // 3
-        col = idx % 3
-        x = 0.8 + col * 4.0
-        y = 1.4 + row * 2.7
-        add_card(slide6, x, y, 3.73, 2.5)
-        
-        tb = slide6.shapes.add_textbox(Inches(x + 0.15), Inches(y + 0.15), Inches(3.43), Inches(2.2))
-        tf = tb.text_frame
-        tf.word_wrap = True
-        
-        p = tf.paragraphs[0]
-        p.text = title
-        p.font.size = Pt(12)
-        p.font.bold = True
-        p.font.color.rgb = color
-        
-        p_f = tf.add_paragraph()
-        p_f.text = formula
-        p_f.font.size = Pt(10)
-        p_f.font.color.rgb = TEXT_MAIN
-        p_f.space_before = Pt(6)
+    # Column 2: Loss Function (Purple/Indigo Theme)
+    c2 = add_card(slide6, 4.84, 1.4, 3.65, 5.4, bg_color=WHITE, border_color=RGBColor(233, 213, 255))
+    h2_box = slide6.shapes.add_textbox(Inches(5.04), Inches(1.5), Inches(3.25), Inches(0.5))
+    tf_h2 = h2_box.text_frame
+    p_h2 = tf_h2.paragraphs[0]
+    p_h2.text = "❷  Loss Function"
+    p_h2.font.size = Pt(17)
+    p_h2.font.bold = True
+    p_h2.font.color.rgb = RGBColor(126, 34, 206)
+
+    tb_p2 = slide6.shapes.add_textbox(Inches(5.04), Inches(2.1), Inches(3.25), Inches(4.5))
+    tf_p2 = tb_p2.text_frame
+    tf_p2.word_wrap = True
+
+    p = tf_p2.paragraphs[0]
+    p.text = "We use Class-Weighted Focal Loss to combat severe class imbalance:"
+    p.font.size = Pt(11.5)
+    p.font.color.rgb = TEXT_MAIN
+
+    p_f = tf_p2.add_paragraph()
+    p_f.text = "ℒ_Focal = - ∑_c α_c y_c (1 - p_c)^γ log(p_c)"
+    p_f.font.size = Pt(12)
+    p_f.font.bold = True
+    p_f.font.color.rgb = RGBColor(126, 34, 206)
+    p_f.space_before = Pt(10)
+
+    p_g = tf_p2.add_paragraph()
+    p_g.text = "γ  Gamma (γ = 2.0)"
+    p_g.font.size = Pt(13)
+    p_g.font.bold = True
+    p_g.font.color.rgb = RGBColor(126, 34, 206)
+    p_g.space_before = Pt(14)
+
+    p_gd = tf_p2.add_paragraph()
+    p_gd.text = "Suppresses gradient contributions from easy, dominant majority classes (Grade 0)."
+    p_gd.font.size = Pt(11)
+    p_gd.font.color.rgb = TEXT_MUTED
+    p_gd.space_before = Pt(3)
+
+    p_a = tf_p2.add_paragraph()
+    p_a.text = "α  Alpha (α_c)"
+    p_a.font.size = Pt(13)
+    p_a.font.bold = True
+    p_a.font.color.rgb = RGBColor(126, 34, 206)
+    p_a.space_before = Pt(14)
+
+    p_ad = tf_p2.add_paragraph()
+    p_ad.text = "Enforces a 9.3× higher gradient penalty on rare Grade 3 lesions (α_3 = 3.81 vs α_0 = 0.41)."
+    p_ad.font.size = Pt(11)
+    p_ad.font.color.rgb = TEXT_MUTED
+    p_ad.space_before = Pt(3)
+
+    # Column 3: Quantum Layer & QWK (Teal/Green Theme)
+    c3 = add_card(slide6, 8.88, 1.4, 3.65, 5.4, bg_color=WHITE, border_color=RGBColor(204, 251, 241))
+    h3_box = slide6.shapes.add_textbox(Inches(9.08), Inches(1.5), Inches(3.25), Inches(0.5))
+    tf_h3 = h3_box.text_frame
+    p_h3 = tf_h3.paragraphs[0]
+    p_h3.text = "❸  Quantum Layer"
+    p_h3.font.size = Pt(17)
+    p_h3.font.bold = True
+    p_h3.font.color.rgb = TEAL
+
+    tb_p3 = slide6.shapes.add_textbox(Inches(9.08), Inches(2.1), Inches(3.25), Inches(4.5))
+    tf_p3 = tb_p3.text_frame
+    tf_p3.word_wrap = True
+
+    p = tf_p3.paragraphs[0]
+    p.text = "A Strongly Entangling Ansatz U(θ) is trained via the Parameter-Shift Rule for exact analytical gradients:"
+    p.font.size = Pt(11.5)
+    p.font.color.rgb = TEXT_MAIN
+
+    p_circ = tf_p3.add_paragraph()
+    p_circ.text = "|0⟩ ── Ry(θ_0) ── ● ─────── R(α,β,γ) ── ⟨Z_0⟩\n|0⟩ ── Ry(θ_1) ── ⊕ ── ● ── R(α,β,γ) ── ⟨Z_1⟩\n|0⟩ ── Ry(θ_2) ─────── ⊕ ── R(α,β,γ) ── ⟨Z_2⟩"
+    p_circ.font.size = Pt(9.5)
+    p_circ.font.bold = True
+    p_circ.font.color.rgb = TEAL
+    p_circ.space_before = Pt(8)
+
+    p_qwk_t = tf_p3.add_paragraph()
+    p_qwk_t.text = "Quadratic Weighted Kappa (QWK):"
+    p_qwk_t.font.size = Pt(12)
+    p_qwk_t.font.bold = True
+    p_qwk_t.font.color.rgb = DARK_BLUE
+    p_qwk_t.space_before = Pt(12)
+
+    p_qwk_d = tf_p3.add_paragraph()
+    p_qwk_d.text = "Clinical agreement metric that penalizes distant misclassifications quadratically:"
+    p_qwk_d.font.size = Pt(10.5)
+    p_qwk_d.font.color.rgb = TEXT_MUTED
+    p_qwk_d.space_before = Pt(2)
+
+    p_qwk_f = tf_p3.add_paragraph()
+    p_qwk_f.text = "κ = 1 - (∑_ij w_ij O_ij) / (∑_ij w_ij E_ij)\nw_ij = (i - j)² / 16  (w_0,4 = 1.0 vs w_0,1 = 0.0625)"
+    p_qwk_f.font.size = Pt(10.5)
+    p_qwk_f.font.bold = True
+    p_qwk_f.font.color.rgb = DARK_BLUE
+    p_qwk_f.space_before = Pt(6)
 
     # =========================================================
     # SLIDE 7: SYSTEM ARCHITECTURE AND TECHNOLOGY STACK
