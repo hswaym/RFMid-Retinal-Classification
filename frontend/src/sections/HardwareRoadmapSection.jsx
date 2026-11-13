@@ -46,7 +46,7 @@ export default function HardwareRoadmapSection() {
   return (
     <section id="hardware" className="w-full bg-[#F2EEE9] text-[#151410] py-24 border-b border-[#E5E1DC]">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        
+
         {/* Section Header */}
         <div className="max-w-3xl mb-12">
           <div className="inline-flex items-center space-x-2 text-xs font-mono-data text-[#151410] tracking-widest uppercase mb-4 px-3 py-1 bg-white rounded-full border border-[#E5E1DC] shadow-xs">
@@ -59,9 +59,9 @@ export default function HardwareRoadmapSection() {
             <span className="italic text-[#E4442C]">IBM Quantum deployment.</span>
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#57534E] leading-relaxed">
-            Existing quantum machine learning literature operates purely on ideal noiseless statevectors. 
-            Physical Noisy Intermediate-Scale Quantum (NISQ) processors suffer from gate infidelities 
-            and thermal relaxation (T₁, T₂). We executed full depolarizing noise sweeps across the entire 550-sample 
+            Existing quantum machine learning literature operates purely on ideal noiseless statevectors.
+            Physical Noisy Intermediate-Scale Quantum (NISQ) processors suffer from gate infidelities
+            and thermal relaxation (T₁, T₂). We executed full depolarizing noise sweeps across the entire 550-sample
             test set and transpiled our 4-qubit circuit onto IBM's 127-qubit Eagle architecture (<code>ibm_brisbane</code>).
           </p>
         </div>
@@ -302,8 +302,8 @@ export default function HardwareRoadmapSection() {
                     Key Empirical Finding
                   </span>
                   <p className="font-sans text-[11px] text-[#57534E] leading-tight">
-                    Even at an aggressive depolarizing error rate of <strong className="text-[#151410]">p = 10.0%</strong>, 
-                    the 4-qubit autoencoder HQNN retains a QWK of <strong className="text-[#151410]">0.7139</strong>, 
+                    Even at an aggressive depolarizing error rate of <strong className="text-[#151410]">p = 10.0%</strong>,
+                    the 4-qubit autoencoder HQNN retains a QWK of <strong className="text-[#151410]">0.7139</strong>,
                     remaining strictly above the minimum clinical benchmark threshold of 0.70.
                   </p>
                 </div>
@@ -365,7 +365,7 @@ export default function HardwareRoadmapSection() {
               127-Qubit Eagle QPU
             </h4>
             <p className="text-xs text-[#57534E] leading-relaxed font-sans">
-              Targeting <code>ibm_brisbane</code> via <code>qiskit-ibm-runtime</code>. Dynamic backend calibration 
+              Targeting <code>ibm_brisbane</code> via <code>qiskit-ibm-runtime</code>. Dynamic backend calibration
               selects physical qubits [0, 1, 2, 3] exhibiting minimal cross-talk and ECR gate infidelities (&lt;0.8%).
             </p>
           </div>
@@ -378,7 +378,7 @@ export default function HardwareRoadmapSection() {
               Zero-Noise Extrapolation (ZNE)
             </h4>
             <p className="text-xs text-[#57534E] leading-relaxed font-sans">
-              Unitary folding at noise scale factors λ ∈ &#123;1.0, 1.5, 2.0&#125; with polynomial/Richardson extrapolation 
+              Unitary folding at noise scale factors λ ∈ &#123;1.0, 1.5, 2.0&#125; with polynomial/Richardson extrapolation
               projects Pauli expectation values back to the zero-noise limit (λ → 0).
             </p>
           </div>
@@ -391,7 +391,7 @@ export default function HardwareRoadmapSection() {
               M3 Measurement Mitigation
             </h4>
             <p className="text-xs text-[#57534E] leading-relaxed font-sans">
-              Matrix-free Measurement Mitigation pre-calibrates readout assignment error tensors, 
+              Matrix-free Measurement Mitigation pre-calibrates readout assignment error tensors,
               correcting physical detector misidentifications (|0⟩ misread as |1⟩) in post-processing.
             </p>
           </div>

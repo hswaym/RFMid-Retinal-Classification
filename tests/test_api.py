@@ -64,3 +64,19 @@ def test_predict_image():
     assert data["clahe_image_b64"].startswith("data:image/png;base64,")
     assert len(data["angles_rad"]) == 4
 
+
+def test_predict_image_rejects_ood():
+    # Synthetic out-of-distribution image (e.g. white ID card / document)
+    doc_img = np.full((224, 224, 3), 240, dtype=np.uint8)
+    # Add fake black text
+    cv2.putText(doc_img, "ID CARD", (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 2)
+
+    success, buf = cv2.imencode(".png", doc_img)
+    assert success
+    img_bytes = io.BytesIO(buf.tobytes())
+
+    res = client.post("/predict/image", files={"file": ("id_card.png", img_bytes, "image/png")})
+    assert res.status_code == 422
+    assert "Out-of-Distribution Image Rejected" in res.json()["detail"]
+
+

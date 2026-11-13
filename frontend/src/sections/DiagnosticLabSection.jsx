@@ -3,33 +3,33 @@ import { sampleCases } from '../data';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, ShieldAlert, Clock, Sparkles, Activity, Upload, Radio, FileImage } from 'lucide-react';
 
 function BlochSphere({ angle, label, index }) {
-  const cx = 44, cy = 44, r = 36;
+  const cx = 32, cy = 32, r = 24;
   const dotY = cy - Math.cos(angle) * r * 0.82;
   const dotX = cx + Math.sin(angle) * r * 0.7;
   return (
-    <div className="flex flex-col items-center gap-1">
-      <svg width="88" height="88" viewBox="0 0 88 88">
+    <div className="flex flex-col items-center gap-1 p-2 bg-[#FAF8F5] border border-[#E5E1DC] rounded-xl w-24">
+      <svg width="64" height="64" viewBox="0 0 64 64">
         {/* Outer ring */}
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#E5E1DC" strokeWidth="1.5" />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#D8D3CC" strokeWidth="1.2" />
         {/* Equator ellipse */}
-        <ellipse cx={cx} cy={cy} rx={r} ry={r * 0.28} fill="none" stroke="#E5E1DC" strokeWidth="1" strokeDasharray="3 2" />
+        <ellipse cx={cx} cy={cy} rx={r} ry={r * 0.28} fill="none" stroke="#D8D3CC" strokeWidth="0.8" strokeDasharray="2 2" />
         {/* Z axis */}
-        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="#E5E1DC" strokeWidth="1" />
+        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="#D8D3CC" strokeWidth="0.8" />
         {/* X axis (horizontal equator line) */}
-        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="#E5E1DC" strokeWidth="1" />
+        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="#D8D3CC" strokeWidth="0.8" />
         {/* Pole dots */}
-        <circle cx={cx} cy={cy - r} r="2.5" fill="#A8A29E" />
-        <circle cx={cx} cy={cy + r} r="2.5" fill="#A8A29E" />
+        <circle cx={cx} cy={cy - r} r="2" fill="#A8A29E" />
+        <circle cx={cx} cy={cy + r} r="2" fill="#A8A29E" />
         {/* State vector line */}
-        <line x1={cx} y1={cy} x2={dotX} y2={dotY} stroke="#E4442C" strokeWidth="1.5" strokeOpacity="0.7" />
+        <line x1={cx} y1={cy} x2={dotX} y2={dotY} stroke="#E4442C" strokeWidth="1.5" strokeOpacity="0.85" />
         {/* State dot */}
-        <circle cx={dotX} cy={dotY} r="5" fill="#E4442C" stroke="#FFFFFF" strokeWidth="1.5" />
+        <circle cx={dotX} cy={dotY} r="4" fill="#E4442C" stroke="#FFFFFF" strokeWidth="1.2" />
         {/* |0⟩ / |1⟩ labels */}
-        <text x={cx} y={cy - r - 5} textAnchor="middle" fontSize="8" fontFamily="monospace" fill="#78716C">|0⟩</text>
-        <text x={cx} y={cy + r + 11} textAnchor="middle" fontSize="8" fontFamily="monospace" fill="#78716C">|1⟩</text>
+        <text x={cx} y={cy - r - 3} textAnchor="middle" fontSize="7" fontFamily="monospace" fill="#78716C">|0⟩</text>
+        <text x={cx} y={cy + r + 9} textAnchor="middle" fontSize="7" fontFamily="monospace" fill="#78716C">|1⟩</text>
       </svg>
       <span className="text-xs font-mono-data font-bold text-[#151410]">q{['₀','₁','₂','₃'][index]}</span>
-      <span className="text-[10px] font-mono-data text-[#78716C]">{angle.toFixed(3)} rad</span>
+      <span className="text-[10px] font-mono-data text-[#E4442C] font-semibold">{angle.toFixed(2)} rad</span>
     </div>
   );
 }
@@ -94,7 +94,14 @@ export default function DiagnosticLabSection() {
 
       setInferenceStep(2); // Autoencoder
       if (!response.ok) {
-        throw new Error(`Inference API error: ${response.statusText}`);
+        let errDetail = `Inference API error (${response.statusText || response.status})`;
+        try {
+          const errJson = await response.json();
+          if (errJson && errJson.detail) {
+            errDetail = errJson.detail;
+          }
+        } catch (_) {}
+        throw new Error(errDetail);
       }
 
       setInferenceStep(3); // Quantum Circuit
@@ -117,12 +124,17 @@ export default function DiagnosticLabSection() {
       setIsInferring(false);
     } catch (err) {
       console.warn('Backend inference unavailable or failed:', err);
+      setCustomPrediction(null);
       setUploadError(
         apiOnline
-          ? `Inference error: ${err.message}`
-          : 'Local FastAPI backend (port 8000) is offline. Start the backend with: python -m api.main to enable live image inference.'
+          ? err.message
+          : 'Local FastAPI backend (port 8000) is offline. Start the backend with: python run_project.py to enable live image inference.'
       );
       setIsInferring(false);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -210,9 +222,28 @@ export default function DiagnosticLabSection() {
           </div>
 
           {uploadError && (
-            <div className="mb-4 p-3 bg-[#FEF9C3] border border-[#FEF08A] rounded-xl text-xs font-mono-data text-[#854D0E] flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0 text-[#EAB308]" />
-              <span>{uploadError}</span>
+            <div className="mb-6 p-4 bg-[#FBECE9] border-2 border-[#E4442C] rounded-2xl text-xs font-mono-data text-[#151410] flex items-start justify-between gap-3 shadow-sm">
+              <div className="flex items-start space-x-3">
+                <ShieldAlert className="w-5 h-5 flex-shrink-0 text-[#E4442C] mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-bold text-[#E4442C] uppercase tracking-wider block text-[11px]">
+                    Quality Gate // Out-of-Distribution Image Rejected
+                  </span>
+                  <p className="text-xs text-[#2E2B27] leading-relaxed font-sans">
+                    {uploadError}
+                  </p>
+                  <span className="text-[10px] text-[#78716C] block mt-1 font-mono-data">
+                    Protocol requirement: Ocular retinal fundus photography (.jpg, .png) exhibiting authentic choroidal/hemoglobin vascular chrominance.
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setUploadError(null)}
+                className="text-[#78716C] hover:text-[#151410] text-sm p-1"
+                title="Dismiss"
+              >
+                ✕
+              </button>
             </div>
           )}
 
@@ -332,9 +363,9 @@ export default function DiagnosticLabSection() {
 
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
                 {/* Bloch Spheres or Polar Radar */}
-                <div className="sm:col-span-5 flex justify-center">
+                <div className="sm:col-span-5 flex justify-center items-center">
                   {angleView === 'bloch' ? (
-                    <div className="flex gap-2 items-end">
+                    <div className="grid grid-cols-2 gap-2.5 justify-items-center w-full max-w-[210px]">
                       {currentCase.angles.map((ang, i) => (
                         <BlochSphere key={i} angle={ang} label={`q${i}`} index={i} />
                       ))}

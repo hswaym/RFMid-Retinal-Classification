@@ -20,6 +20,7 @@ from src.classical.resnet_baseline import ResNet18FeatureExtractor
 from src.compression.autoencoder import FeatureAutoencoder
 from src.preprocessing.ben_graham_crop import circle_crop_fov
 from src.preprocessing.clahe import apply_green_channel_clahe
+from src.preprocessing.fundus_validator import validate_fundus_image
 from src.quantum.torch_layer import get_quantum_torch_layer
 
 router = APIRouter(prefix="/predict", tags=["Prediction"])
@@ -145,6 +146,11 @@ class HQNNInferenceEngine:
         img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img_bgr is None:
             raise ValueError("Invalid image file format or corrupted bytes.")
+
+        # Ophthalmic Quality & Out-of-Distribution (OOD) Validation Gate
+        is_valid, reason, _ = validate_fundus_image(img_bgr)
+        if not is_valid:
+            raise ValueError(f"OOD_IMAGE: {reason}")
 
         # 1. Ben Graham circular FOV crop standardizing to 224x224
         cropped_bgr = circle_crop_fov(img_bgr, output_size=224)
@@ -290,6 +296,15 @@ async def predict_image(file: UploadFile = File(...)):
         tensor, b64_preview = engine.preprocess_image(content)
         result = engine.infer_from_tensor(tensor, b64_preview=b64_preview)
         return result
+    except ValueError as ve:
+        err_msg = str(ve)
+        if "OOD_IMAGE:" in err_msg:
+            clean_reason = err_msg.replace("OOD_IMAGE:", "").strip()
+            raise HTTPException(
+                status_code=422,
+                detail=f"Out-of-Distribution Image Rejected: {clean_reason} Only authentic ocular retinal fundus scans can be evaluated for diabetic retinopathy.",
+            )
+        raise HTTPException(status_code=400, detail=err_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference pipeline error: {str(e)}")
 

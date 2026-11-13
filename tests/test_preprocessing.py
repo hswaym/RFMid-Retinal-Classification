@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from src.preprocessing.ben_graham_crop import circle_crop_fov, crop_black_border
 from src.preprocessing.clahe import apply_green_channel_clahe
+from src.preprocessing.fundus_validator import validate_fundus_image
 
 
 def test_crop_black_border():
@@ -36,4 +37,25 @@ def test_apply_green_channel_clahe():
     np.testing.assert_array_equal(enhanced[:, :, 2], img[:, :, 2])
     # Green channel should be contrast enhanced
     assert not np.array_equal(enhanced[:, :, 1], img[:, :, 1])
+
+
+def test_validate_fundus_image():
+    # 1. Valid fundus simulation: dark background, reddish-orange vascular circle
+    valid_fundus = np.zeros((224, 224, 3), dtype=np.uint8)
+    import cv2
+    cv2.circle(valid_fundus, (112, 112), 90, (20, 60, 180), -1)
+    is_valid, reason, _ = validate_fundus_image(valid_fundus)
+    assert is_valid is True
+
+    # 2. Invalid: White document / ID card
+    doc = np.full((224, 224, 3), 245, dtype=np.uint8)
+    is_valid, reason, _ = validate_fundus_image(doc)
+    assert is_valid is False
+    assert "Document or artificial white background" in reason
+
+    # 3. Invalid: Grayscale image
+    gray = np.full((224, 224, 3), 120, dtype=np.uint8)
+    is_valid, reason, _ = validate_fundus_image(gray)
+    assert is_valid is False
+
 
