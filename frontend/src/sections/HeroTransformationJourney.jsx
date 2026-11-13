@@ -78,7 +78,7 @@ export default function HeroTransformationJourney() {
             {/* Telemetry pill */}
             <div className="inline-flex items-center space-x-2.5 px-3 py-1 rounded-full bg-white border border-[#E5E1DC] text-[11px] font-mono-data text-[#151410] tracking-widest uppercase mb-8 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-ping" />
-              <span>HYBRID QUANTUM-CLASSICAL NEURAL NETWORK // ERI 5</span>
+              <span>HYBRID QUANTUM-CLASSICAL NEURAL ARCHITECTURE // CLINICAL STUDY</span>
             </div>
 
             {/* High-contrast Figma Editorial Headline */}

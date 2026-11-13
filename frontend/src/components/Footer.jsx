@@ -87,7 +87,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-[#E5E1DC] flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#78716C] gap-4">
           <div>
-            <span>© 2026 Project ERI 5 / TY_CSE_10 · Final Year Engineering Capstone</span>
+            <span>© 2026 Quantum Retinal Intelligence Initiative · IEEE Transactions Research Study</span>
           </div>
           <div className="flex items-center space-x-6">
             <span>Faculty of Engineering & Technology</span>

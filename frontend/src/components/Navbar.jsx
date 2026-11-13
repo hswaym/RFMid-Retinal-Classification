@@ -13,14 +13,14 @@ export default function Navbar() {
       }
 
       const sections = [
-        { id: 'journey', label: '01 Journey' },
-        { id: 'clinical', label: '02 Clinical Spectrum' },
-        { id: 'quantum-vs-classical', label: '03 Quantum vs CNN' },
-        { id: 'deep-dive', label: '04 Four Pillars' },
-        { id: 'diagnostic-lab', label: '05 Clinical Lab' },
-        { id: 'benchmarks', label: '06 Benchmarks' },
-        { id: 'hardware', label: '07 NISQ Resilience' },
-        { id: 'technical-inquiries', label: '08 Peer Review' },
+        { id: 'journey', label: '01 Quantum Transformation' },
+        { id: 'clinical', label: '02 Pathological Continuum' },
+        { id: 'quantum-vs-classical', label: '03 Parametric Compaction' },
+        { id: 'deep-dive', label: '04 Architectural Pillars' },
+        { id: 'diagnostic-lab', label: '05 Diagnostic Simulator' },
+        { id: 'benchmarks', label: '06 Benchmark Matrix' },
+        { id: 'hardware', label: '07 Cryogenic QPU Deployment' },
+        { id: 'technical-inquiries', label: '08 Methodological Defense' },
       ];
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -64,15 +64,15 @@ export default function Navbar() {
             <img src="/a/logo.svg" alt="HQNN Quantum Retina" className="h-8 w-auto" />
           </button>
           <span className="text-[#D8D3CC] hidden sm:inline">|</span>
-          <span className="text-[#78716C] hidden lg:inline text-[11px]">
-            PROJECT ERI 5 · APTOS 2019
+          <span className="text-[#78716C] hidden lg:inline text-[11px] tracking-widest font-semibold">
+            CLINICAL QUANTUM INITIATIVE · APTOS 2019
           </span>
         </div>
 
         {/* Center: Current active chapter indicator with vermilion pulse */}
-        <div className="hidden md:flex items-center space-x-2 bg-white px-3.5 py-1.5 rounded-full border border-[#E5E1DC] text-[#151410] text-[11px] shadow-sm">
+        <div className="hidden md:flex items-center space-x-2 bg-white px-3.5 py-1.5 rounded-full border border-[#E5E1DC] text-[#151410] text-[11px] shadow-sm font-mono-data">
           <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-pulse" />
-          <span className="text-[#78716C]">STAGE:</span>
+          <span className="text-[#E4442C] font-bold text-[10px] tracking-wider uppercase">MODULE //</span>
           <span className="font-semibold text-[#151410] tracking-wide">{activeSection}</span>
         </div>
 
