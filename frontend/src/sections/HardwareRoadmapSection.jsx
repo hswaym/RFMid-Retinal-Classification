@@ -70,47 +70,92 @@ export default function HardwareRoadmapSection() {
         <div className="mb-12 p-6 sm:p-8 bg-white border border-[#151410] rounded-2xl shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 bg-[#151410] text-white text-[10px] font-mono-data px-4 py-1.5 rounded-bl-xl tracking-wider uppercase flex items-center space-x-1.5">
             <Award className="w-3.5 h-3.5 text-[#EAB308]" />
-            <span>Verified Hardware Execution // Milestone 4.2</span>
+            <span>Verified Physical QPU & Emulated Benchmarks // Milestone 4.2</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#E5E1DC] pb-6 mb-6">
             <div>
-              <span className="text-xs font-mono-data text-[#1F5D3A] font-semibold uppercase tracking-wider block">
-                Target Backend: FakeBrisbane (127-Qubit Eagle Architecture)
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#1F5D3A] animate-pulse"></span>
+                <span className="text-xs font-mono-data text-[#1F5D3A] font-semibold uppercase tracking-wider block">
+                  Physical Hardware Target: ibm_marrakesh (156-Qubit Heron Architecture)
+                </span>
+              </div>
               <h3 className="font-editorial text-2xl sm:text-3xl font-normal text-[#151410] mt-1">
-                Zero-Noise Retained Hardware Performance
+                Cryogenic Superconducting Quantum Hardware Verification
               </h3>
             </div>
-            <div className="flex items-center space-x-2 text-xs font-mono-data text-[#57534E]">
-              <Terminal className="w-4 h-4 text-[#E4442C]" />
-              <span>Transpiled with Qiskit Level 3 Optimization</span>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono-data">
+              <a
+                href="https://quantum.ibm.com/jobs/dbrhmc7v5hds73dhrg9g"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#FAF8F5] border border-[#151410] rounded-lg text-[#151410] hover:bg-[#151410] hover:text-white transition-all font-semibold"
+              >
+                <span>IBM Job: dbrhmc7v5hds73dhrg9g</span>
+                <Terminal className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono-data text-xs mb-6">
-            <div className="p-4 bg-[#FAF8F5] border border-[#E5E1DC] rounded-xl">
-              <span className="text-[10px] text-[#78716C] block uppercase">Hardware QWK</span>
-              <span className="text-2xl sm:text-3xl font-bold text-[#1F5D3A] block mt-1">0.7839</span>
-              <span className="text-[10px] text-[#57534E] block mt-0.5">Ideal sim: 0.7693</span>
+          {/* Dual Hardware Comparison Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* Real Hardware Card */}
+            <div className="p-5 bg-[#FAF8F5] border-2 border-[#1F5D3A] rounded-xl relative">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-mono-data uppercase font-bold text-[#1F5D3A] tracking-wider">
+                  Live Physical Cloud QPU (15 mK Cryostat)
+                </span>
+                <span className="text-[10px] font-mono-data bg-[#1F5D3A] text-white px-2 py-0.5 rounded">
+                  ibm_marrakesh
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 font-mono-data">
+                <div>
+                  <span className="text-[10px] text-[#78716C] block uppercase">Physical QWK</span>
+                  <span className="text-2xl font-bold text-[#1F5D3A] block mt-0.5">0.7170</span>
+                  <span className="text-[10px] text-[#57534E]">Sim: 0.7693</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#78716C] block uppercase">Sim-to-Real</span>
+                  <span className="text-2xl font-bold text-[#151410] block mt-0.5">93.2%</span>
+                  <span className="text-[10px] text-[#1F5D3A] font-semibold">&gt; 0.70 Target</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#78716C] block uppercase">QPU Depth</span>
+                  <span className="text-2xl font-bold text-[#E4442C] block mt-0.5">20</span>
+                  <span className="text-[10px] text-[#57534E]">1,024 Shots</span>
+                </div>
+              </div>
             </div>
 
-            <div className="p-4 bg-[#FAF8F5] border border-[#E5E1DC] rounded-xl">
-              <span className="text-[10px] text-[#78716C] block uppercase">QWK Retention</span>
-              <span className="text-2xl sm:text-3xl font-bold text-[#151410] block mt-1">101.9%</span>
-              <span className="text-[10px] text-[#1F5D3A] font-semibold block mt-0.5">Zero Sim-to-Real Loss</span>
-            </div>
-
-            <div className="p-4 bg-[#FAF8F5] border border-[#E5E1DC] rounded-xl">
-              <span className="text-[10px] text-[#78716C] block uppercase">Transpiled Depth</span>
-              <span className="text-2xl sm:text-3xl font-bold text-[#E4442C] block mt-1">25</span>
-              <span className="text-[10px] text-[#57534E] block mt-0.5">8 ECR + 49 Single-Qubit</span>
-            </div>
-
-            <div className="p-4 bg-[#FAF8F5] border border-[#E5E1DC] rounded-xl">
-              <span className="text-[10px] text-[#78716C] block uppercase">Physical Layout</span>
-              <span className="text-2xl sm:text-3xl font-bold text-[#151410] block mt-1">Q[0..3]</span>
-              <span className="text-[10px] text-[#57534E] block mt-0.5">2,048 Shots / Circuit</span>
+            {/* FakeBrisbane Baseline Card */}
+            <div className="p-5 bg-[#FAF8F5] border border-[#E5E1DC] rounded-xl">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-mono-data uppercase font-bold text-[#57534E] tracking-wider">
+                  Eagle Architecture Emulation (100 Samples)
+                </span>
+                <span className="text-[10px] font-mono-data bg-[#57534E] text-white px-2 py-0.5 rounded">
+                  FakeBrisbane
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 font-mono-data">
+                <div>
+                  <span className="text-[10px] text-[#78716C] block uppercase">Emulated QWK</span>
+                  <span className="text-2xl font-bold text-[#151410] block mt-0.5">0.7839</span>
+                  <span className="text-[10px] text-[#57534E]">127 Qubits</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#78716C] block uppercase">Retention</span>
+                  <span className="text-2xl font-bold text-[#151410] block mt-0.5">101.9%</span>
+                  <span className="text-[10px] text-[#1F5D3A]">Zero degradation</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#78716C] block uppercase">Transpiled Depth</span>
+                  <span className="text-2xl font-bold text-[#57534E] block mt-0.5">25</span>
+                  <span className="text-[10px] text-[#57534E]">2,048 Shots</span>
+                </div>
+              </div>
             </div>
           </div>
 

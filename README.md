@@ -23,7 +23,7 @@ This project implements an end-to-end **Hybrid Quantum-Classical Convolutional N
 * **99.8% Parameter Reduction**: Our 4-qubit parameterized quantum ansatz requires only **12 variational parameters**, matching the clinical benchmark performance (**0.7693 QWK**) of classical models with over $11.2\text{M}$ parameters.
 * **The "37-Parameter Paradox"**: Demonstrates that unsupervised statistical projections (PCA) fail on fundus images ($\text{QWK} = 0.1379$) because microvascular lesions occupy $<1\%$ of image variance, whereas non-linear bottleneck autoencoders preserve lesion geometry in a 4-dimensional latent Riemannian manifold.
 * **Empirical NISQ Noise Resilience ($N=550$)**: Proves through systematic depolarizing error sweeps ($p \in [0.001, 0.10]$) that clinical validity ($\text{QWK} \ge 0.70$) is maintained even under aggressive $10\%$ gate error rates ($\text{QWK} = 0.7139$).
-* **Physical 127-Qubit IBM Quantum Hardware Deployment**: Transpiled and executed on the 127-qubit IBM Eagle processor (`FakeBrisbane` / `ibm_brisbane`) at circuit depth 25, recording **101.9% QWK retention** ($0.7839$ hardware QWK) with zero sim-to-real degradation.
+* **Physical 156-Qubit IBM Quantum Heron QPU Deployment**: Executed a live batch on the cryogenic 156-qubit Heron processor (`ibm_marrakesh`, Job ID: `dbrhmc7v5hds73dhrg9g`) cooled to 15 mK, recording **93.2% QWK retention** ($0.7170$ hardware QWK) exceeding the clinical threshold ($\ge 0.70$). Emulation on the 127-qubit Eagle architecture (`FakeBrisbane`) across 100 test samples confirmed **101.9% QWK retention** ($0.7839$).
 
 ---
 
