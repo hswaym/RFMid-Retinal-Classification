@@ -13,14 +13,14 @@ export default function Navbar() {
       }
 
       const sections = [
-        { id: 'journey', label: '01 Quantum Transformation' },
-        { id: 'clinical', label: '02 Pathological Continuum' },
-        { id: 'quantum-vs-classical', label: '03 Parametric Compaction' },
-        { id: 'deep-dive', label: '04 Architectural Pillars' },
-        { id: 'diagnostic-lab', label: '05 Diagnostic Simulator' },
-        { id: 'benchmarks', label: '06 Benchmark Matrix' },
-        { id: 'hardware', label: '07 Cryogenic QPU Deployment' },
-        { id: 'technical-inquiries', label: '08 Methodological Defense' },
+        { id: 'journey', label: '01 Architecture' },
+        { id: 'clinical', label: '02 Pathology' },
+        { id: 'quantum-vs-classical', label: '03 Quantum vs CNN' },
+        { id: 'deep-dive', label: '04 Pillars' },
+        { id: 'diagnostic-lab', label: '05 Clinical Lab' },
+        { id: 'benchmarks', label: '06 Benchmarks' },
+        { id: 'hardware', label: '07 IBM QPU' },
+        { id: 'technical-inquiries', label: '08 Defense' },
       ];
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -54,31 +54,31 @@ export default function Navbar() {
         style={{ width: `${scrollProgress}%` }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between text-xs font-mono-data tracking-tight">
-        {/* Left: Official HQNN Emblem & Project ID */}
-        <div className="flex items-center space-x-4">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between text-xs font-mono-data tracking-tight gap-4">
+        {/* Left: Official HQNN Emblem & Research Subtitle */}
+        <div className="flex items-center space-x-3 flex-shrink-0">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center space-x-3 text-[#151410] hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-2 text-[#151410] hover:opacity-80 transition-opacity"
           >
-            <img src="/a/logo.svg" alt="HQNN Quantum Retina" className="h-8 w-auto" />
+            <img src="/a/logo.svg" alt="HQNN Quantum Retina" className="h-7 w-auto" />
           </button>
           <span className="text-[#D8D3CC] hidden sm:inline">|</span>
-          <span className="text-[#78716C] hidden lg:inline text-[11px] tracking-widest font-semibold">
-            CLINICAL QUANTUM INITIATIVE · APTOS 2019
+          <span className="text-[#78716C] hidden sm:inline text-[11px] tracking-widest font-semibold uppercase whitespace-nowrap">
+            CLINICAL STUDY · APTOS 2019
           </span>
         </div>
 
         {/* Center: Current active chapter indicator with vermilion pulse */}
-        <div className="hidden md:flex items-center space-x-2 bg-white px-3.5 py-1.5 rounded-full border border-[#E5E1DC] text-[#151410] text-[11px] shadow-sm font-mono-data">
-          <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-pulse" />
-          <span className="text-[#E4442C] font-bold text-[10px] tracking-wider uppercase">MODULE //</span>
-          <span className="font-semibold text-[#151410] tracking-wide">{activeSection}</span>
+        <div className="hidden md:flex items-center space-x-2 bg-white px-3.5 py-1.5 rounded-full border border-[#E5E1DC] text-[#151410] text-[11px] shadow-sm font-mono-data whitespace-nowrap flex-shrink-0">
+          <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-pulse flex-shrink-0" />
+          <span className="text-[#E4442C] font-bold text-[10px] tracking-wider uppercase whitespace-nowrap">MODULE //</span>
+          <span className="font-semibold text-[#151410] tracking-wide whitespace-nowrap">{activeSection}</span>
         </div>
 
         {/* Right: Quick jump anchors & Live Prototype Badge */}
-        <div className="flex items-center space-x-3 md:space-x-5">
-          <nav className="hidden lg:flex items-center space-x-5 text-[#78716C]">
+        <div className="flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
+          <nav className="hidden lg:flex items-center space-x-4 text-[#78716C] whitespace-nowrap text-xs">
             <button
               onClick={() => scrollTo('clinical')}
               className="hover:text-[#151410] transition-colors"
@@ -104,15 +104,21 @@ export default function Navbar() {
               Benchmarks
             </button>
             <button
+              onClick={() => scrollTo('hardware')}
+              className="hover:text-[#151410] transition-colors"
+            >
+              IBM QPU
+            </button>
+            <button
               onClick={() => scrollTo('technical-inquiries')}
               className="hover:text-[#151410] transition-colors"
             >
-              Peer Review
+              Defense
             </button>
           </nav>
 
-          <span className="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider bg-[#FBECE9] text-[#E4442C] border border-[#E4442C]/20 rounded-full flex items-center space-x-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#E4442C]" />
+          <span className="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider bg-[#FBECE9] text-[#E4442C] border border-[#E4442C]/20 rounded-full flex items-center space-x-1.5 whitespace-nowrap flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E4442C] flex-shrink-0" />
             <span>QWK 0.7693</span>
           </span>
         </div>
