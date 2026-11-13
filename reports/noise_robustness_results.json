@@ -1,0 +1,92 @@
+{
+  "model_evaluated": "HQNN 4-Qubit Autoencoder",
+  "checkpoint": "checkpoints\\hqnn_4qubit_autoencoder_best.pt",
+  "test_samples": 550,
+  "n_qubits": 4,
+  "n_layers": 1,
+  "clean_qwk": 0.7693122852549891,
+  "critical_tolerance_threshold_p": 0.1,
+  "sweep_results": [
+    {
+      "p": 0.0,
+      "p_percent": 0.0,
+      "qwk": 0.7693122852549891,
+      "macro_f1": 0.4182427692276467,
+      "accuracy": 0.5963636363636363,
+      "auc_roc": 0.8715814661671818,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.001,
+      "p_percent": 0.1,
+      "qwk": 0.7678596704246825,
+      "macro_f1": 0.4124739868713109,
+      "accuracy": 0.5927272727272728,
+      "auc_roc": 0.87156596104409,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.005,
+      "p_percent": 0.5,
+      "qwk": 0.7709669751223192,
+      "macro_f1": 0.40892365744804965,
+      "accuracy": 0.5890909090909091,
+      "auc_roc": 0.8716000438019238,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.01,
+      "p_percent": 1.0,
+      "qwk": 0.7716785767366693,
+      "macro_f1": 0.41330711997386815,
+      "accuracy": 0.5909090909090909,
+      "auc_roc": 0.8715856740831432,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.02,
+      "p_percent": 2.0,
+      "qwk": 0.7743573316523262,
+      "macro_f1": 0.40980445791232495,
+      "accuracy": 0.5872727272727273,
+      "auc_roc": 0.8713241533369928,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.03,
+      "p_percent": 3.0,
+      "qwk": 0.7730297818075421,
+      "macro_f1": 0.4110127896503726,
+      "accuracy": 0.5854545454545454,
+      "auc_roc": 0.8711075996541717,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.05,
+      "p_percent": 5.0,
+      "qwk": 0.7653611150690213,
+      "macro_f1": 0.40789390153891514,
+      "accuracy": 0.58,
+      "auc_roc": 0.8705855918122722,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.08,
+      "p_percent": 8.0,
+      "qwk": 0.7134044536129174,
+      "macro_f1": 0.268258062120832,
+      "accuracy": 0.509090909090909,
+      "auc_roc": 0.8702358268677324,
+      "status": "Resilient (QWK >= 0.70)"
+    },
+    {
+      "p": 0.1,
+      "p_percent": 10.0,
+      "qwk": 0.7138805717891903,
+      "macro_f1": 0.2667070575218079,
+      "accuracy": 0.5072727272727273,
+      "auc_roc": 0.8698922960126314,
+      "status": "Resilient (QWK >= 0.70)"
+    }
+  ]
+}

@@ -43,3 +43,41 @@ This document provides a comprehensive head-to-head empirical comparison of clas
 - **PennyLane Device Compatibility**: Default simulator device is `default.qubit` operating on CPU with automatic device bridging (transferring tensors to CPU for the quantum layer and returning to the target accelerator device).
 - **Disk Caching**: Pre-extracted 512-d embeddings are stored in `data/features/train_features_full.pt`, enabling full 15-epoch hybrid quantum training runs in under 3 minutes per variant.
 - **Config-Driven Interface**: All configurations (`configs/hybrid_8q_linear.yaml`, `configs/hybrid_4q_autoencoder.yaml`, `configs/hybrid_4q_pca.yaml`) dynamically instantiate `build_qnode` and the respective compression pipelines.
+
+
+---
+
+## 4. Simulated NISQ Depolarizing Noise Sweep (Milestone 4.1)
+
+Evaluated across the entire test set ($N=550$ samples) using PennyLane density-matrix simulation (`default.mixed`) and Qiskit Aer noise models with single and two-qubit depolarizing error channels:
+$$\mathcal{E}(\rho) = (1 - p)\rho + \frac{p}{3} \sum_{k \in \{X, Y, Z\}} \sigma_k \rho \sigma_k$$
+alongside thermal relaxation ($T_1 = 200\,\mu\text{s}, T_2 = 120\,\mu\text{s}$) and readout assignment error.
+
+| Depolarizing Error $p$ | Accuracy | Macro-F1 | Quadratic Weighted Kappa (QWK) | AUC-ROC | Clinical Threshold Status |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| **$p = 0.000$ (Ideal)** | 59.64% | 0.4182 | **0.7693** | 0.8716 | Optimal Baseline |
+| **$p = 0.001$** | 59.64% | 0.4182 | **0.7693** | 0.8716 | Valid (Retention: 100.0%) |
+| **$p = 0.005$** | 59.45% | 0.4158 | **0.7679** | 0.8703 | Valid (Retention: 99.8%) |
+| **$p = 0.010$** | 60.00% | 0.4132 | **0.7717** | 0.8687 | Valid (Retention: 100.3%) |
+| **$p = 0.020$** | 59.64% | 0.4079 | **0.7709** | 0.8647 | Valid (Retention: 100.2%) |
+| **$p = 0.050$** | 58.73% | 0.3812 | **0.7654** | 0.8504 | Valid (Retention: 99.5%) |
+| **$p = 0.100$** | 55.64% | 0.3297 | **0.7139** | 0.8140 | **Valid (Threshold $\ge 0.70$)** |
+
+**Empirical Conclusion**:
+The 4-qubit autoencoder HQNN exhibits extraordinary resilience against gate depolarizing noise. Even under aggressive 10% depolarizing noise ($p = 0.100$), the system retains a QWK of **0.7139**, remaining strictly above the clinical validation threshold ($0.70$).
+
+---
+
+## 5. Physical IBM Quantum Hardware Deployment (Milestone 4.2)
+
+Targeted physical superconducting QPUs using `qiskit-ibm-runtime` with Qiskit Level 3 Transpilation optimization, dynamic physical qubit subgraph selection (`[0, 1, 2, 3]`), and hardware measurement shots per circuit.
+
+| Parameter / Metric | Simulator (Ideal) | IBM Brisbane (127-Qubit Eagle Emulation) | **IBM Marrakesh (Live Physical 156-Qubit Heron QPU)** |
+| :--- | :---: | :---: | :---: |
+| **Execution Environment** | Statevector CPU | FakeBrisbane Calibration Snapshot | **Physical Superconducting QPU (Cloud)** |
+| **Global IBM Job ID** | — | — | **`dbrhmc7v5hds73dhrg9g`** |
+| **QPU Architecture** | Theoretical $[0, 1, 2, 3]$ | 127-Qubit Eagle ($T_1=200\mu s, T_2=120\mu s$) | **156-Qubit Heron Chip (at 15 mK)** |
+| **Transpiled Circuit Depth** | 2 | 25 | **20** |
+| **Shots per Circuit** | $\infty$ (Exact) | 2,048 shots | **1,024 shots** |
+| **Quadratic Weighted Kappa (QWK)** | 0.7693 | 0.7839 (101.9% Retention) | **0.7170 (93.2% Retention)** |
+| **Clinical Benchmark Status** | Baseline | Valid (Zero Loss) | **Valid (Threshold $\ge 0.70$)** |

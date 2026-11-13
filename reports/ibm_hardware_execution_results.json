@@ -1,0 +1,49 @@
+{
+  "status": "COMPLETED",
+  "job_id": "dbrhmc7v5hds73dhrg9g",
+  "backend": "ibm_marrakesh",
+  "backend_type": "Live IBM Quantum QPU: ibm_marrakesh (156 Qubits)",
+  "samples_evaluated": 10,
+  "shots_per_circuit": 1024,
+  "transpilation_profile": {
+    "backend_name": "ibm_marrakesh",
+    "n_qubits": 4,
+    "layout": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "circuit_depth": 20,
+    "two_qubit_gates": 0,
+    "single_qubit_gates": 29,
+    "total_operations": 43,
+    "basis_gates": [
+      "rz",
+      "measure",
+      "if_else",
+      "x",
+      "reset_2",
+      "sx",
+      "measure_reset_2",
+      "xslow",
+      "cz",
+      "delay",
+      "reset",
+      "id",
+      "measure_2",
+      "measure_reset"
+    ]
+  },
+  "hardware_metrics": {
+    "qwk": 0.7169811320754716,
+    "macro_f1": 0.2,
+    "accuracy": 0.4,
+    "auc_roc": 0.0
+  },
+  "sim_to_real_gap": {
+    "simulator_ideal_qwk": 0.7693,
+    "hardware_qwk": 0.7169811320754716,
+    "qwk_retention_percent": 93.19915924547922
+  }
+}

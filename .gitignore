@@ -68,3 +68,9 @@ logs/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Video & Scratch Generation Assets
+brag-output/
+motion-ad/
+node_modules/
+

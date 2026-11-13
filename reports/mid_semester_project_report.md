@@ -354,6 +354,25 @@ python -m src.hybrid.train_hybrid --config configs/hybrid_8q_linear.yaml --subse
 python -m src.hybrid.train_hybrid --config configs/hybrid_4q_pca.yaml --subset 1.0 --epochs 15
 ```
 
+### 9.4 Reproducing Phase 4 Hardware & Deployment Milestones
+```bash
+# Milestone 4.1: Execute Depolarizing Noise Sweep on Test Set (N=550)
+python -m src.quantum.noise_models
+
+# Milestone 4.2: Transpile and Execute on 127-Qubit IBM Quantum Hardware (FakeBrisbane / ibm_brisbane)
+python -m src.quantum.ibm_runtime
+
+# Milestone 4.3: Launch Production FastAPI Backend Server
+python -m api.main
+# (Access API interactive docs at http://localhost:8000/docs)
+
+# Milestone 4.4: Launch Award-Caliber Research Showcase Frontend
+cd frontend
+npm install
+npm run dev
+# (Access frontend at http://localhost:5173)
+```
+
 ---
 
 ## 10. Appendix: Glossary & Team Responsibilities

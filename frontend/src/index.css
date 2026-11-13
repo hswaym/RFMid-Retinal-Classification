@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: 'Instrument Serif', 'Fraunces', Georgia, serif;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Exact Figma Color System */
+    --color-page: #F2EEE9;
+    --color-page-muted: #EBE6E0;
+    --color-surface-white: #FFFFFF;
+    --color-surface-card: #FAF8F5;
+
+    /* Inks */
+    --color-ink-primary: #151410;
+    --color-ink-body: #2E2B27;
+    --color-ink-muted: #78716C;
+    --color-ink-faint: #A8A29E;
+
+    /* Accents */
+    --color-vermilion: #E4442C;
+    --color-vermilion-tint: #FBECE9;
+    --color-green: #1F5D3A;
+    --color-green-tint: #EAF3EE;
+
+    /* Hairlines */
+    --color-border: #E5E1DC;
+    --color-border-dark: #D8D3CC;
+
+    /* Full-bleed 3D Quantum Canvas Void */
+    --color-quantum-void: #0B0C0E;
+    --color-quantum-surface: #12141A;
+    --color-quantum-border: rgba(255, 255, 255, 0.1);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-page);
+    color: var(--color-ink-body);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-editorial {
+    font-family: var(--font-serif);
+  }
+
+  code,
+  pre,
+  .font-mono-data {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Editorial Paper Cards */
+.editorial-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 8px 24px -12px rgba(21, 20, 16, 0.05);
+}
+
+.editorial-card-elevated {
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 20px 30px -10px rgba(21, 20, 16, 0.08);
+}
+
+/* Custom Crosshair Cursor matching Figma */
+.custom-cursor-dot {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-vermilion);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s cubic-bezier(0.22, 1, 0.36, 1), height 0.2s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s;
+  z-index: 9999;
+}
+
+.custom-cursor-ring {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(228, 68, 44, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1), height 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s;
+  z-index: 9998;
+}
+
+/* Hairline Grid & Rules */
+.border-hairline {
+  border-color: var(--color-border);
+}
+
+.bg-paper-grid {
+  background-image:
+    linear-gradient(rgba(21, 20, 16, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 20, 16, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
