@@ -2,6 +2,38 @@ import React, { useState, useEffect, useRef } from 'react';
 import { sampleCases } from '../data';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, ShieldAlert, Clock, Sparkles, Activity, Upload, Radio, FileImage } from 'lucide-react';
 
+function BlochSphere({ angle, label, index }) {
+  const cx = 44, cy = 44, r = 36;
+  const dotY = cy - Math.cos(angle) * r * 0.82;
+  const dotX = cx + Math.sin(angle) * r * 0.7;
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        {/* Outer ring */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#E5E1DC" strokeWidth="1.5" />
+        {/* Equator ellipse */}
+        <ellipse cx={cx} cy={cy} rx={r} ry={r * 0.28} fill="none" stroke="#E5E1DC" strokeWidth="1" strokeDasharray="3 2" />
+        {/* Z axis */}
+        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="#E5E1DC" strokeWidth="1" />
+        {/* X axis (horizontal equator line) */}
+        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="#E5E1DC" strokeWidth="1" />
+        {/* Pole dots */}
+        <circle cx={cx} cy={cy - r} r="2.5" fill="#A8A29E" />
+        <circle cx={cx} cy={cy + r} r="2.5" fill="#A8A29E" />
+        {/* State vector line */}
+        <line x1={cx} y1={cy} x2={dotX} y2={dotY} stroke="#E4442C" strokeWidth="1.5" strokeOpacity="0.7" />
+        {/* State dot */}
+        <circle cx={dotX} cy={dotY} r="5" fill="#E4442C" stroke="#FFFFFF" strokeWidth="1.5" />
+        {/* |0⟩ / |1⟩ labels */}
+        <text x={cx} y={cy - r - 5} textAnchor="middle" fontSize="8" fontFamily="monospace" fill="#78716C">|0⟩</text>
+        <text x={cx} y={cy + r + 11} textAnchor="middle" fontSize="8" fontFamily="monospace" fill="#78716C">|1⟩</text>
+      </svg>
+      <span className="text-xs font-mono-data font-bold text-[#151410]">q{['₀','₁','₂','₃'][index]}</span>
+      <span className="text-[10px] font-mono-data text-[#78716C]">{angle.toFixed(3)} rad</span>
+    </div>
+  );
+}
+
 export default function DiagnosticLabSection() {
   const [selectedCaseIdx, setSelectedCaseIdx] = useState(3);
   const [isInferring, setIsInferring] = useState(false);
@@ -9,6 +41,8 @@ export default function DiagnosticLabSection() {
   const [apiOnline, setApiOnline] = useState(false);
   const [customPrediction, setCustomPrediction] = useState(null);
   const [uploadError, setUploadError] = useState(null);
+  const [angleView, setAngleView] = useState('bloch'); // 'bloch' | 'radar'
+  const [showReport, setShowReport] = useState(false);
   const fileInputRef = useRef(null);
 
   // Check if local FastAPI backend is active
@@ -103,6 +137,8 @@ export default function DiagnosticLabSection() {
       return `${x},${y}`;
     }).join(' ');
   };
+
+  const handleExportReport = () => setShowReport(true);
 
   return (
     <section id="diagnostic-lab" className="w-full bg-[#F2EEE9] text-[#151410] py-24 border-b border-[#E5E1DC]">
@@ -269,46 +305,72 @@ export default function DiagnosticLabSection() {
           {/* Right: Quantum Angles & Diagnostic Confidence */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Quantum Angle Inspector (Radar chart + Polar dial) */}
+            {/* Quantum Angle Inspector (Bloch Spheres / Polar Radar) */}
             <div className="bg-white text-[#151410] p-6 rounded-2xl border border-[#E5E1DC] space-y-4 shadow-sm">
               <div className="flex items-center justify-between text-xs font-mono-data border-b border-[#E5E1DC] pb-3">
                 <span className="text-[#78716C]">QUANTUM ANGLE INSPECTOR (θ₀..θ₃ ∈ [-π, π])</span>
                 <span className="text-[#E4442C] font-semibold">Autoencoder Latent Angles</span>
               </div>
 
+              {/* Toggle pill */}
+              <div className="flex justify-start">
+                <div className="inline-flex rounded-full border border-[#E5E1DC] bg-[#FAF8F5] p-0.5 text-[10px] font-mono-data gap-0.5">
+                  <button
+                    onClick={() => setAngleView('bloch')}
+                    className={`px-3 py-1 rounded-full transition-all ${angleView === 'bloch' ? 'bg-[#151410] text-white shadow-sm' : 'text-[#78716C] hover:text-[#151410]'}`}
+                  >
+                    Bloch Spheres
+                  </button>
+                  <button
+                    onClick={() => setAngleView('radar')}
+                    className={`px-3 py-1 rounded-full transition-all ${angleView === 'radar' ? 'bg-[#151410] text-white shadow-sm' : 'text-[#78716C] hover:text-[#151410]'}`}
+                  >
+                    Polar Radar
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-                {/* SVG Polar Radar Display */}
+                {/* Bloch Spheres or Polar Radar */}
                 <div className="sm:col-span-5 flex justify-center">
-                  <svg className="w-44 h-44" viewBox="0 0 160 160">
-                    <circle cx="80" cy="80" r="65" fill="none" stroke="#E5E1DC" strokeWidth="1" strokeDasharray="3 3" />
-                    <circle cx="80" cy="80" r="40" fill="none" stroke="#E5E1DC" strokeWidth="1" />
-                    <circle cx="80" cy="80" r="15" fill="none" stroke="#E5E1DC" strokeWidth="1" />
-                    
-                    <line x1="80" y1="15" x2="80" y2="145" stroke="#E5E1DC" strokeWidth="1" />
-                    <line x1="15" y1="80" x2="145" y2="80" stroke="#E5E1DC" strokeWidth="1" />
+                  {angleView === 'bloch' ? (
+                    <div className="flex gap-2 items-end">
+                      {currentCase.angles.map((ang, i) => (
+                        <BlochSphere key={i} angle={ang} label={`q${i}`} index={i} />
+                      ))}
+                    </div>
+                  ) : (
+                    <svg className="w-44 h-44" viewBox="0 0 160 160">
+                      <circle cx="80" cy="80" r="65" fill="none" stroke="#E5E1DC" strokeWidth="1" strokeDasharray="3 3" />
+                      <circle cx="80" cy="80" r="40" fill="none" stroke="#E5E1DC" strokeWidth="1" />
+                      <circle cx="80" cy="80" r="15" fill="none" stroke="#E5E1DC" strokeWidth="1" />
+                      
+                      <line x1="80" y1="15" x2="80" y2="145" stroke="#E5E1DC" strokeWidth="1" />
+                      <line x1="15" y1="80" x2="145" y2="80" stroke="#E5E1DC" strokeWidth="1" />
 
-                    <polygon
-                      points={getRadarCoordinates(currentCase.angles)}
-                      fill="rgba(228, 68, 44, 0.12)"
-                      stroke="#E4442C"
-                      strokeWidth="2.5"
-                    />
+                      <polygon
+                        points={getRadarCoordinates(currentCase.angles)}
+                        fill="rgba(228, 68, 44, 0.12)"
+                        stroke="#E4442C"
+                        strokeWidth="2.5"
+                      />
 
-                    {currentCase.angles.map((ang, i) => {
-                      const r = ((ang + Math.PI) / (2 * Math.PI)) * 65;
-                      const phi = (i * Math.PI) / 2 - Math.PI / 2;
-                      const x = 80 + Math.cos(phi) * r;
-                      const y = 80 + Math.sin(phi) * r;
-                      return (
-                        <circle key={i} cx={x} cy={y} r="4" fill="#FFFFFF" stroke="#E4442C" strokeWidth="2" />
-                      );
-                    })}
+                      {currentCase.angles.map((ang, i) => {
+                        const r = ((ang + Math.PI) / (2 * Math.PI)) * 65;
+                        const phi = (i * Math.PI) / 2 - Math.PI / 2;
+                        const x = 80 + Math.cos(phi) * r;
+                        const y = 80 + Math.sin(phi) * r;
+                        return (
+                          <circle key={i} cx={x} cy={y} r="4" fill="#FFFFFF" stroke="#E4442C" strokeWidth="2" />
+                        );
+                      })}
 
-                    <text x="80" y="10" textAnchor="middle" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₀</text>
-                    <text x="155" y="83" textAnchor="start" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₁</text>
-                    <text x="80" y="158" textAnchor="middle" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₂</text>
-                    <text x="5" y="83" textAnchor="end" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₃</text>
-                  </svg>
+                      <text x="80" y="10" textAnchor="middle" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₀</text>
+                      <text x="155" y="83" textAnchor="start" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₁</text>
+                      <text x="80" y="158" textAnchor="middle" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₂</text>
+                      <text x="5" y="83" textAnchor="end" fill="#151410" fontSize="9" fontFamily="monospace" fontWeight="bold">θ₃</text>
+                    </svg>
+                  )}
                 </div>
 
                 {/* Numerical Angle Values */}
@@ -386,6 +448,15 @@ export default function DiagnosticLabSection() {
                   {currentCase.recommendation}
                 </p>
               </div>
+
+              {/* Export Clinical Report Button */}
+              <button
+                onClick={handleExportReport}
+                className="w-full mt-2 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl border border-[#151410] bg-[#151410] text-white text-xs font-mono-data font-semibold hover:bg-[#2E2B27] transition-all shadow-sm"
+              >
+                <span>📋</span>
+                <span>Export Clinical Report</span>
+              </button>
             </div>
 
           </div>
@@ -393,6 +464,115 @@ export default function DiagnosticLabSection() {
         </div>
 
       </div>
+
+      {/* Clinical Report Modal Overlay */}
+      {showReport && (
+        <div className="fixed inset-0 z-50 bg-white overflow-auto p-8 print:p-4">
+          <div className="max-w-2xl mx-auto">
+            {/* Action Buttons - hidden on print */}
+            <div className="flex justify-between mb-8 print:hidden">
+              <button
+                onClick={() => window.print()}
+                className="flex items-center space-x-2 px-5 py-2.5 bg-[#151410] text-white rounded-xl text-sm font-mono-data font-semibold hover:bg-[#2E2B27] transition-all"
+              >
+                <span>🖨️</span>
+                <span>Print Report</span>
+              </button>
+              <button
+                onClick={() => setShowReport(false)}
+                className="flex items-center space-x-2 px-5 py-2.5 border border-[#E5E1DC] rounded-xl text-sm font-mono-data text-[#57534E] hover:bg-[#FAF8F5] transition-all"
+              >
+                <span>✕ Close</span>
+              </button>
+            </div>
+
+            {/* Report Content */}
+            <div className="border border-[#E5E1DC] rounded-2xl p-8 space-y-6 print:border-none print:p-0">
+              {/* Header */}
+              <div className="text-center border-b border-[#E5E1DC] pb-6">
+                <h1 className="text-3xl font-bold text-[#151410] tracking-tight font-mono uppercase">HQNN DIAGNOSTIC REPORT</h1>
+                <p className="text-sm text-[#57534E] mt-1">Hybrid Quantum-Classical Diabetic Retinopathy Screening</p>
+                <div className="mt-3 flex flex-col items-center gap-1 text-xs font-mono-data text-[#78716C]">
+                  <span>Report Date/Time: {new Date().toLocaleString()}</span>
+                  <span>Specimen ID: {currentCase.id || 'CUSTOM_UPLOAD'}</span>
+                </div>
+              </div>
+
+              {/* Grade Result */}
+              <div className="text-center py-4">
+                <span className="text-xs font-mono-data text-[#78716C] uppercase tracking-wider block mb-1">Diagnostic Grade Result</span>
+                <span
+                  className="text-4xl font-bold tracking-tight"
+                  style={{ color: currentCase.grade >= 3 ? '#E4442C' : currentCase.grade === 0 ? '#1F5D3A' : '#854D0E' }}
+                >
+                  {currentCase.gradeLabel}
+                </span>
+                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-mono-data font-bold border"
+                  style={{
+                    backgroundColor: currentCase.grade >= 3 ? '#FBECE9' : currentCase.grade === 0 ? '#EAF3EE' : '#FEF9C3',
+                    borderColor: currentCase.grade >= 3 ? '#E4442C' : currentCase.grade === 0 ? '#1F5D3A' : '#EAB308',
+                    color: currentCase.grade >= 3 ? '#E4442C' : currentCase.grade === 0 ? '#1F5D3A' : '#854D0E',
+                  }}>
+                  TRIAGE: {currentCase.urgency?.toUpperCase() || 'ROUTINE'}
+                </div>
+              </div>
+
+              {/* Quantum Angles 2×2 Grid */}
+              <div>
+                <span className="text-xs font-mono-data text-[#78716C] uppercase tracking-wider block mb-3">Variational Quantum Angles (θ₀..θ₃)</span>
+                <div className="grid grid-cols-2 gap-3 font-mono-data text-sm">
+                  {currentCase.angles.map((ang, i) => (
+                    <div key={i} className="p-3 border border-[#E5E1DC] rounded-xl bg-[#FAF8F5]">
+                      <span className="text-[#78716C] text-xs block">θ{['₀','₁','₂','₃'][i]} (wire q{i})</span>
+                      <span className="font-bold text-[#151410]">{ang.toFixed(4)} <span className="text-xs text-[#E4442C]">rad</span></span>
+                      <span className="text-xs text-[#57534E] block">{((ang / Math.PI) * 180).toFixed(1)}°</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Probability Distribution */}
+              <div>
+                <span className="text-xs font-mono-data text-[#78716C] uppercase tracking-wider block mb-3">Post-Quantum Softmax Probability Distribution</span>
+                <div className="space-y-2">
+                  {['Grade 0: Normal', 'Grade 1: Mild NPDR', 'Grade 2: Moderate NPDR', 'Grade 3: Severe NPDR', 'Grade 4: Proliferative DR'].map((label, g) => {
+                    const prob = currentCase.probabilities[g];
+                    const isTop = g === currentCase.grade;
+                    return (
+                      <div key={g} className="space-y-0.5">
+                        <div className="flex justify-between text-xs font-mono-data">
+                          <span className={isTop ? 'font-bold text-[#151410]' : 'text-[#78716C]'}>{label}</span>
+                          <span className={isTop ? 'font-bold text-[#E4442C]' : 'text-[#78716C]'}>{(prob * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-[#F2EEE9] rounded-full overflow-hidden border border-[#E5E1DC]">
+                          <div
+                            className="h-full rounded-full"
+                            style={{ width: `${prob * 100}%`, backgroundColor: isTop ? (g >= 3 ? '#E4442C' : '#1F5D3A') : '#E5E1DC' }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Recommendation */}
+              <div className="p-4 rounded-xl border border-[#E5E1DC] bg-[#FAF8F5]">
+                <span className="text-xs font-mono-data text-[#78716C] uppercase tracking-wider block mb-1">Clinical Recommendation</span>
+                <p className="text-sm text-[#2E2B27] leading-relaxed">{currentCase.recommendation}</p>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="text-center pt-4 border-t border-[#E5E1DC]">
+                <span className="text-[11px] font-mono-data text-[#A8A29E] italic">
+                  ⚠ Research Prototype — Not for Clinical Diagnosis
+                </span>
+                <p className="text-[10px] text-[#A8A29E] mt-1">Generated by HQNN Capstone System · PennyLane 4-Qubit Variational Ansatz</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

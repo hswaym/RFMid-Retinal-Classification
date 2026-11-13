@@ -312,6 +312,104 @@ export default function EngineeringDeepDiveSection() {
                 ))}
               </div>
             </div>
+
+            {/* FIG. 3 // 4-QUBIT VARIATIONAL ANSATZ — CIRCUIT DIAGRAM */}
+            <div className="bg-white p-6 border border-[#E5E1DC] rounded-2xl mt-8 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono-data text-[#78716C] uppercase tracking-wider font-semibold">
+                  FIG. 3 // 4-QUBIT VARIATIONAL ANSATZ — CIRCUIT DIAGRAM (L=1 STRONGLY ENTANGLING LAYER)
+                </span>
+              </div>
+
+              <svg viewBox="0 0 700 220" className="w-full" xmlns="http://www.w3.org/2000/svg" fontFamily="monospace">
+                {/* Wire lines */}
+                {[0, 1, 2, 3].map((q) => {
+                  const y = 36 + q * 48;
+                  return (
+                    <line key={`wire-${q}`} x1="60" y1={y} x2="650" y2={y} stroke="#E5E1DC" strokeWidth="1.5" />
+                  );
+                })}
+
+                {/* Qubit labels */}
+                {['q₀','q₁','q₂','q₃'].map((label, q) => {
+                  const y = 36 + q * 48;
+                  return (
+                    <text key={`label-${q}`} x="50" y={y + 4} textAnchor="end" fontSize="13" fill="#151410" fontWeight="bold">{label}</text>
+                  );
+                })}
+
+                {/* Angle Embedding Ry gates (column 1) */}
+                {[0, 1, 2, 3].map((q) => {
+                  const y = 36 + q * 48;
+                  const gx = 80, gy = y - 14, gw = 80, gh = 28;
+                  return (
+                    <g key={`ae-${q}`}>
+                      <rect x={gx} y={gy} width={gw} height={gh} rx="5" fill="#FFFFFF" stroke="#151410" strokeWidth="1.5" />
+                      <text x={gx + gw / 2} y={gy + 18} textAnchor="middle" fontSize="11" fill="#151410" fontWeight="bold">Rᵧ(θ{['₀','₁','₂','₃'][q]})</text>
+                    </g>
+                  );
+                })}
+
+                {/* StronglyEntangling Ry gates (column 2) */}
+                {[0, 1, 2, 3].map((q) => {
+                  const y = 36 + q * 48;
+                  const gx = 240, gy = y - 14, gw = 56, gh = 28;
+                  return (
+                    <g key={`se-${q}`}>
+                      <rect x={gx} y={gy} width={gw} height={gh} rx="5" fill="#FFFFFF" stroke="#151410" strokeWidth="1.5" />
+                      <text x={gx + gw / 2} y={gy + 18} textAnchor="middle" fontSize="11" fill="#151410" fontWeight="bold">Rᵧ</text>
+                    </g>
+                  );
+                })}
+
+                {/* CNOT gates: (q0→q1), (q1→q2), (q2→q3), (q3→q0) */}
+                {[[0,1],[1,2],[2,3],[3,0]].map(([ctrl, tgt], i) => {
+                  const cx = 360 + i * 50;
+                  const cy_ctrl = 36 + ctrl * 48;
+                  const cy_tgt = tgt === 0 && ctrl === 3 ? 36 : 36 + tgt * 48;
+                  const topY = Math.min(cy_ctrl, cy_tgt);
+                  const botY = Math.max(cy_ctrl, cy_tgt);
+                  return (
+                    <g key={`cnot-${i}`}>
+                      {/* Vertical connecting line */}
+                      <line x1={cx} y1={topY} x2={cx} y2={botY} stroke="#151410" strokeWidth="1.5" />
+                      {/* Control dot */}
+                      <circle cx={cx} cy={cy_ctrl} r="6" fill="#E4442C" />
+                      {/* Target ⊕ */}
+                      <circle cx={cx} cy={cy_tgt} r="10" fill="none" stroke="#E4442C" strokeWidth="2" />
+                      <line x1={cx - 10} y1={cy_tgt} x2={cx + 10} y2={cy_tgt} stroke="#E4442C" strokeWidth="2" />
+                      <line x1={cx} y1={cy_tgt - 10} x2={cx} y2={cy_tgt + 10} stroke="#E4442C" strokeWidth="2" />
+                    </g>
+                  );
+                })}
+
+                {/* Measurement 〈Z〉 boxes */}
+                {[0, 1, 2, 3].map((q) => {
+                  const y = 36 + q * 48;
+                  const gx = 578, gy = y - 14, gw = 60, gh = 28;
+                  return (
+                    <g key={`meas-${q}`}>
+                      <rect x={gx} y={gy} width={gw} height={gh} rx="5" fill="#FFFFFF" stroke="#151410" strokeWidth="1.5" />
+                      <text x={gx + gw / 2} y={gy + 18} textAnchor="middle" fontSize="11" fill="#151410" fontWeight="bold">〈Z〉</text>
+                    </g>
+                  );
+                })}
+
+                {/* Section labels */}
+                <text x="120" y="210" textAnchor="middle" fontSize="9" fill="#A8A29E">Angle Embedding</text>
+                <text x="268" y="210" textAnchor="middle" fontSize="9" fill="#A8A29E">SEL Rotations</text>
+                <text x="435" y="210" textAnchor="middle" fontSize="9" fill="#A8A29E">CNOT Ring</text>
+                <text x="608" y="210" textAnchor="middle" fontSize="9" fill="#A8A29E">Measurement</text>
+              </svg>
+
+              {/* Legend */}
+              <div className="mt-4 flex flex-wrap gap-4 text-xs font-mono-data text-[#57534E] border-t border-[#E5E1DC] pt-3">
+                <span>🔵 Rᵧ(θ) = Angle Embedding (data encoding)</span>
+                <span>🟥 CNOT (⊕) = Entangling gates</span>
+                <span>⬛ 〈Z〉 = Pauli-Z expectation measurement</span>
+              </div>
+            </div>
+
           </div>
         )}
 
