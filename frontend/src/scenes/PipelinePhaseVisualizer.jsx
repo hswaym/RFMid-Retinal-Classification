@@ -356,3 +356,4 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
     </div>
   );
 }
+

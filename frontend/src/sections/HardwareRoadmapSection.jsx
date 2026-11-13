@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Cpu, ShieldCheck, Layers, CheckCircle2, Award, Terminal, Cloud, Key, Check, AlertCircle, RefreshCw } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export default function HardwareRoadmapSection() {
   const [noiseP, setNoiseP] = useState(0.010);
   const [showRealCurve, setShowRealCurve] = useState(false);
@@ -23,7 +25,7 @@ export default function HardwareRoadmapSection() {
     setIbmCloudResult(null);
 
     try {
-      const res = await fetch('http://localhost:8000/hardware/ibm-cloud/connect', {
+      const res = await fetch(`${API_BASE}/hardware/ibm-cloud/connect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: ibmToken.trim() }),

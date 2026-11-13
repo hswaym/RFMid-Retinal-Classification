@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { sampleCases } from '../data';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, ShieldAlert, Clock, Sparkles, Activity, Upload, Radio, FileImage } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function BlochSphere({ angle, label, index }) {
   const cx = 32, cy = 32, r = 24;
   const dotY = cy - Math.cos(angle) * r * 0.82;
@@ -45,9 +47,9 @@ export default function DiagnosticLabSection() {
   const [showReport, setShowReport] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Check if local FastAPI backend is active
+  // Check if FastAPI backend is active
   useEffect(() => {
-    fetch('http://localhost:8000/health')
+    fetch(`${API_BASE}/health`)
       .then((res) => {
         if (res.ok) return res.json();
         throw new Error('API offline');
@@ -87,7 +89,7 @@ export default function DiagnosticLabSection() {
 
     try {
       setInferenceStep(1); // Ben Graham & CLAHE
-      const response = await fetch('http://localhost:8000/predict/image', {
+      const response = await fetch(`${API_BASE}/predict/image`, {
         method: 'POST',
         body: formData,
       });
