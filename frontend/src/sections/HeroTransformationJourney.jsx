@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import RetinalQuantumCanvas from '../scenes/RetinalQuantumCanvas';
-import { ArrowRight, Sparkles, Orbit, Cpu, Zap, Activity } from 'lucide-react';
+import PipelinePhaseVisualizer from '../scenes/PipelinePhaseVisualizer';
+import { ArrowRight, Sparkles, Cpu, Zap, Activity, Microscope } from 'lucide-react';
 
 const STAGES = [
   {
@@ -151,7 +151,7 @@ export default function HeroTransformationJourney() {
         </div>
       </div>
 
-      {/* Interactive 3D Journey Canvas & Stage Scroller */}
+      {/* Interactive Pipeline Continuum Scroller */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
@@ -162,19 +162,20 @@ export default function HeroTransformationJourney() {
               <span className="text-[#E4442C] font-semibold">PHASE {current.step} / 06</span>
             </div>
 
-            {/* Stage Selector Pills */}
-            <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+            {/* Stage Selector Grid */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-3 gap-2 py-1">
               {STAGES.map((s, idx) => (
                 <button
                   key={s.step}
                   onClick={() => handleStageSelect(idx)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-mono-data tracking-wider transition-all whitespace-nowrap ${
+                  className={`p-2.5 rounded-xl text-xs font-mono-data tracking-wider transition-all text-center ${
                     activeStage === idx
                       ? 'bg-[#151410] text-white font-medium shadow-sm'
                       : 'bg-white text-[#78716C] hover:text-[#151410] border border-[#E5E1DC]'
                   }`}
                 >
-                  {s.step} {s.marker}
+                  <span className="block font-bold text-xs">{s.step}</span>
+                  <span className="text-[10px] block opacity-80 truncate mt-0.5">{s.marker}</span>
                 </button>
               ))}
             </div>
@@ -183,7 +184,7 @@ export default function HeroTransformationJourney() {
             <div className="p-6 bg-white border border-[#E5E1DC] rounded-2xl space-y-3.5 relative overflow-hidden shadow-sm">
               <div className="text-[10px] font-mono-data uppercase tracking-widest text-[#E4442C] font-semibold flex items-center space-x-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E4442C]" />
-                <span>{current.phase}</span>
+                <span>PHASE {current.step} // {current.phase}</span>
               </div>
 
               <h3 className="font-editorial text-2xl sm:text-3xl font-normal text-[#151410] tracking-tight">
@@ -194,7 +195,7 @@ export default function HeroTransformationJourney() {
                 {current.spec}
               </div>
 
-              <p className="text-xs sm:text-sm text-[#57534E] leading-relaxed pt-1">
+              <p className="text-xs sm:text-sm text-[#57534E] leading-relaxed pt-1 font-sans">
                 {current.desc}
               </p>
 
@@ -205,7 +206,7 @@ export default function HeroTransformationJourney() {
                   onClick={() => handleStageSelect(Math.max(0, activeStage - 1))}
                   className="text-[#78716C] hover:text-[#151410] disabled:opacity-30 disabled:pointer-events-none transition-colors"
                 >
-                  ← PREV STAGE
+                  ← PREVIOUS PHASE
                 </button>
 
                 <div className="flex items-center space-x-1.5">
@@ -224,30 +225,20 @@ export default function HeroTransformationJourney() {
                   onClick={() => handleStageSelect(Math.min(STAGES.length - 1, activeStage + 1))}
                   className="text-[#E4442C] hover:text-[#CC4E31] font-semibold disabled:opacity-30 disabled:pointer-events-none transition-colors"
                 >
-                  NEXT STAGE →
+                  NEXT PHASE →
                 </button>
               </div>
             </div>
 
             <div className="text-[11px] font-mono-data text-[#78716C] flex items-center space-x-2">
-              <Orbit className="w-3.5 h-3.5 text-[#E4442C]" />
-              <span>Real-time WebGL state synthesis · Three.js interactive canvas</span>
+              <Microscope className="w-3.5 h-3.5 text-[#E4442C]" />
+              <span>Interactive Scientific Pipeline · Ophthalmic Ingestion to 156-Qubit IBM QPU</span>
             </div>
           </div>
 
-          {/* Right: High-Performance 3D WebGL Canvas (Full-bleed Near-Black for dramatic contrast) */}
-          <div className="lg:col-span-7 h-[420px] sm:h-[500px] lg:h-[560px] bg-[#0B0C0E] border border-[#151410] rounded-2xl relative overflow-hidden shadow-xl">
-            <RetinalQuantumCanvas progress={progress} />
-
-            {/* Overlay Status Pill */}
-            <div className="absolute top-4 left-4 z-20 bg-[#151410]/80 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[10px] font-mono-data border border-white/10 text-white flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-pulse" />
-              <span>STAGE {current.step}: {current.phase}</span>
-            </div>
-
-            <div className="absolute bottom-4 right-4 z-20 text-[10px] font-mono-data text-white/50">
-              PennyLane QNode interface · Ry state prep
-            </div>
+          {/* Right: Authentic Ophthalmic & Quantum Scientific Visualizer */}
+          <div className="lg:col-span-7 h-[460px] sm:h-[520px] lg:h-[560px] rounded-2xl relative overflow-hidden shadow-xl border border-[#151410]">
+            <PipelinePhaseVisualizer activePhase={activeStage} />
           </div>
 
         </div>

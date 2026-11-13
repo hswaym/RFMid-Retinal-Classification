@@ -111,3 +111,4 @@ def validate_fundus_image(
     }
 
     return True, "Valid retinal fundus photograph.", metrics
+
