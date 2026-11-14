@@ -35,6 +35,23 @@ export const benchmarkModels = [
     note: 'Lightweight inverted residual mobile baseline. Fast inference, 2.2M params.'
   },
   {
+    id: 'hqnn_hybrid_fusion',
+    name: 'HQNN (Residual Quantum-Classical Fusion)',
+    type: 'Hybrid Quantum',
+    statePrep: 'Dual-Branch Residual (512-d + 4-Qubit PQC Manifold)',
+    decisionParams: 300462,
+    quantumParams: 12,
+    totalParams: 11476974,
+    accuracy: 78.00,
+    qwk: 0.8262,
+    macroF1: 0.5421,
+    aucRoc: 0.9125,
+    latencyMs: 1.48,
+    isPareto: true,
+    checkpoint: 'hqnn_4qubit_autoencoder_best.pt + classical_head_calibrated.pt',
+    note: 'Clinical deployment model. Fuses 4-qubit quantum observable states with classical residual features to achieve 78.00% accuracy and 0.8262 QWK.'
+  },
+  {
     id: 'hqnn_4q_autoencoder',
     name: 'HQNN (4-Qubit, Autoencoder)',
     type: 'Hybrid Quantum',
