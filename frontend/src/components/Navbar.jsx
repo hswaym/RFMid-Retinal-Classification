@@ -20,7 +20,7 @@ export default function Navbar() {
         { id: 'diagnostic-lab', label: '05 Clinical Lab' },
         { id: 'benchmarks', label: '06 Benchmarks' },
         { id: 'hardware', label: '07 IBM QPU' },
-        { id: 'technical-inquiries', label: '08 Defense' },
+        { id: 'technical-inquiries', label: '08 Peer Review' },
       ];
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -72,7 +72,8 @@ export default function Navbar() {
         {/* Center: Current active chapter indicator with vermilion pulse */}
         <div className="hidden md:flex items-center space-x-2 bg-white px-3.5 py-1.5 rounded-full border border-[#E5E1DC] text-[#151410] text-[11px] shadow-sm font-mono-data whitespace-nowrap flex-shrink-0">
           <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-pulse flex-shrink-0" />
-          <span className="text-[#E4442C] font-bold text-[10px] tracking-wider uppercase whitespace-nowrap">MODULE //</span>
+          <span className="text-[#E4442C] font-bold text-[10px] tracking-wider uppercase whitespace-nowrap">SECTION</span>
+          <span className="text-[#D8D3CC]">·</span>
           <span className="font-semibold text-[#151410] tracking-wide whitespace-nowrap">{activeSection}</span>
         </div>
 
@@ -113,7 +114,7 @@ export default function Navbar() {
               onClick={() => scrollTo('technical-inquiries')}
               className="hover:text-[#151410] transition-colors"
             >
-              Defense
+              Peer Review
             </button>
           </nav>
 

@@ -62,7 +62,7 @@ export default function BenchmarkAblationSection() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-[#E5E1DC] pb-4">
             <div>
               <span className="text-xs font-mono-data text-[#E4442C] uppercase tracking-wider block font-semibold">
-                FIG. 5 // PARETO OPTIMALITY FRONTIER
+                FIG. 5 · PARETO OPTIMALITY FRONTIER
               </span>
               <h3 className="font-editorial text-2xl sm:text-3xl font-normal tracking-tight text-[#151410] mt-0.5">
                 Decision Parameter Footprint vs. Quadratic Weighted Kappa
@@ -169,7 +169,7 @@ export default function BenchmarkAblationSection() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-[#E5E1DC] pb-4">
             <div>
               <span className="text-xs font-mono-data text-[#E4442C] uppercase tracking-wider block font-semibold">
-                FIG. 6 // CONFUSION MATRIX — HQNN (4-QUBIT AUTOENCODER)
+                FIG. 6 · CONFUSION MATRIX — HQNN (4-QUBIT AUTOENCODER)
               </span>
               <h3 className="font-editorial text-2xl sm:text-3xl font-normal tracking-tight text-[#151410] mt-0.5">
                 Per-class recall on APTOS 2019 test set (N=550)

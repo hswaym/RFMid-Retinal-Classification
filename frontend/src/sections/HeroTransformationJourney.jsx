@@ -78,7 +78,7 @@ export default function HeroTransformationJourney() {
             {/* Telemetry pill */}
             <div className="inline-flex items-center space-x-2.5 px-3 py-1 rounded-full bg-white border border-[#E5E1DC] text-[11px] font-mono-data text-[#151410] tracking-widest uppercase mb-8 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-ping" />
-              <span>HYBRID QUANTUM-CLASSICAL NEURAL ARCHITECTURE // CLINICAL STUDY</span>
+              <span>HYBRID QUANTUM-CLASSICAL NEURAL ARCHITECTURE · CLINICAL STUDY</span>
             </div>
 
             {/* High-contrast Figma Editorial Headline */}
@@ -158,7 +158,7 @@ export default function HeroTransformationJourney() {
           {/* Left / Top: Interactive Step Nav & Annotation Callouts */}
           <div className="lg:col-span-5 space-y-5">
             <div className="flex items-center justify-between text-xs font-mono-data text-[#78716C] border-b border-[#E5E1DC] pb-3">
-              <span>FIG. 1 // PIPELINE CONTINUUM</span>
+              <span>FIG. 1 · PIPELINE CONTINUUM</span>
               <span className="text-[#E4442C] font-semibold">PHASE {current.step} / 06</span>
             </div>
 
@@ -184,7 +184,7 @@ export default function HeroTransformationJourney() {
             <div className="p-6 bg-white border border-[#E5E1DC] rounded-2xl space-y-3.5 relative overflow-hidden shadow-sm">
               <div className="text-[10px] font-mono-data uppercase tracking-widest text-[#E4442C] font-semibold flex items-center space-x-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E4442C]" />
-                <span>PHASE {current.step} // {current.phase}</span>
+                <span>PHASE {current.step} · {current.phase}</span>
               </div>
 
               <h3 className="font-editorial text-2xl sm:text-3xl font-normal text-[#151410] tracking-tight">

@@ -229,7 +229,7 @@ export default function DiagnosticLabSection() {
                 <ShieldAlert className="w-5 h-5 flex-shrink-0 text-[#E4442C] mt-0.5" />
                 <div className="space-y-1">
                   <span className="font-bold text-[#E4442C] uppercase tracking-wider block text-[11px]">
-                    Quality Gate // Out-of-Distribution Image Rejected
+                    Quality Gate · Out-of-Distribution Image Rejected
                   </span>
                   <p className="text-xs text-[#2E2B27] leading-relaxed font-sans">
                     {uploadError}

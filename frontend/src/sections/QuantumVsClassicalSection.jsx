@@ -130,7 +130,7 @@ export default function QuantumVsClassicalSection() {
         <div className="bg-white p-6 border border-[#E5E1DC] rounded-2xl shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-4 text-xs font-mono-data">
             <span className="font-semibold text-[#151410]">
-              FIG. 3 // PARAMETRIC VOLUME SHRINKAGE (DECISION STAGE)
+              FIG. 3 · PARAMETRIC VOLUME SHRINKAGE (DECISION STAGE)
             </span>
             <span className="text-[#E4442C] font-semibold">12 VARIATIONAL ANGLES vs 2,565 CLASSICAL HEAD WEIGHTS</span>
           </div>

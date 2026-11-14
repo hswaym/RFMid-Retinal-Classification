@@ -72,7 +72,7 @@ export default function RetinalQuantumPreloader({ onComplete }) {
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-pulse" />
           <span className="tracking-widest uppercase text-white/80 font-bold">
-            HQNN QUANTUM RETINA // SYSTEM BOOT
+            HQNN QUANTUM RETINA · SYSTEM BOOT
           </span>
         </div>
         <button
@@ -193,3 +193,4 @@ export default function RetinalQuantumPreloader({ onComplete }) {
     </div>
   );
 }
+

@@ -60,7 +60,7 @@ export default function EngineeringDeepDiveSection() {
           <div className="bg-white p-6 sm:p-8 border border-[#E5E1DC] rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-sm">
             <div className="lg:col-span-5 space-y-4">
               <span className="text-xs font-mono-data text-[#1F5D3A] uppercase tracking-wider block font-semibold">
-                PILLAR 01 // OPHTHALMIC SPECTROPHOTOMETRY
+                PILLAR 01 · OPHTHALMIC SPECTROPHOTOMETRY
               </span>
               <h3 className="font-editorial text-3xl font-normal tracking-tight text-[#151410]">
                 Green Channel (540–575 nm) Optical Isolation
@@ -154,7 +154,7 @@ export default function EngineeringDeepDiveSection() {
           <div className="bg-white p-6 sm:p-8 border border-[#E5E1DC] rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-sm">
             <div className="lg:col-span-6 space-y-4">
               <span className="text-xs font-mono-data text-[#E4442C] uppercase tracking-wider block font-semibold">
-                PILLAR 02 // SCIENTIFIC DISCOVERY
+                PILLAR 02 · SCIENTIFIC DISCOVERY
               </span>
               <h3 className="font-editorial text-3xl font-normal tracking-tight text-[#151410]">
                 The "37-Parameter Paradox"
@@ -224,7 +224,7 @@ export default function EngineeringDeepDiveSection() {
               </div>
 
               <div className="text-[11px] font-mono-data text-[#A8A29E] pt-2 border-t border-[#E5E1DC]">
-                FIG. 4 // Latent space compression comparison · 512-d feature space mapped to 4-d
+                FIG. 4 · Latent space compression comparison · 512-d feature space mapped to 4-d
               </div>
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function EngineeringDeepDiveSection() {
           <div className="bg-white p-6 sm:p-8 border border-[#E5E1DC] rounded-2xl space-y-8 shadow-sm">
             <div className="max-w-3xl">
               <span className="text-xs font-mono-data text-[#151410] uppercase tracking-wider block mb-1 font-semibold">
-                PILLAR 03 // QUANTUM VARIATIONAL ANSATZ
+                PILLAR 03 · QUANTUM VARIATIONAL ANSATZ
               </span>
               <h3 className="font-editorial text-3xl font-normal tracking-tight text-[#151410]">
                 Parameterized Quantum Circuit & The Parameter-Shift Rule
@@ -313,11 +313,11 @@ export default function EngineeringDeepDiveSection() {
               </div>
             </div>
 
-            {/* FIG. 3 // 4-QUBIT VARIATIONAL ANSATZ — CIRCUIT DIAGRAM */}
+            {/* FIG. 3 · 4-QUBIT VARIATIONAL ANSATZ — CIRCUIT DIAGRAM */}
             <div className="bg-white p-6 border border-[#E5E1DC] rounded-2xl mt-8 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-mono-data text-[#78716C] uppercase tracking-wider font-semibold">
-                  FIG. 3 // 4-QUBIT VARIATIONAL ANSATZ — CIRCUIT DIAGRAM (L=1 STRONGLY ENTANGLING LAYER)
+                  FIG. 3 · 4-QUBIT VARIATIONAL ANSATZ — CIRCUIT DIAGRAM (L=1 STRONGLY ENTANGLING LAYER)
                 </span>
               </div>
 
@@ -418,7 +418,7 @@ export default function EngineeringDeepDiveSection() {
           <div className="bg-white p-6 sm:p-8 border border-[#E5E1DC] rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-sm">
             <div className="lg:col-span-6 space-y-4">
               <span className="text-xs font-mono-data text-[#E4442C] uppercase tracking-wider block font-semibold">
-                PILLAR 04 // OPTIMIZATION REGULARIZATION
+                PILLAR 04 · OPTIMIZATION REGULARIZATION
               </span>
               <h3 className="font-editorial text-3xl font-normal tracking-tight text-[#151410]">
                 Class-Weighted Focal Loss (γ = 2.0)

@@ -73,7 +73,7 @@ export default function HardwareRoadmapSection() {
         <div className="mb-12 p-6 sm:p-8 bg-white border border-[#151410] rounded-2xl shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 bg-[#151410] text-white text-[10px] font-mono-data px-4 py-1.5 rounded-bl-xl tracking-wider uppercase flex items-center space-x-1.5">
             <Award className="w-3.5 h-3.5 text-[#EAB308]" />
-            <span>Verified Physical QPU & Emulated Benchmarks // Milestone 4.2</span>
+            <span>Verified Physical QPU & Emulated Benchmarks · Milestone 4.2</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#E5E1DC] pb-6 mb-6">

@@ -18,7 +18,7 @@ export default function VivaDefenseSection() {
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="inline-flex items-center space-x-2 text-xs font-mono-data text-[#151410] tracking-widest uppercase mb-4 px-3.5 py-1.5 bg-white rounded-full border border-[#E5E1DC] shadow-xs">
             <BookOpen className="w-3.5 h-3.5 text-[#E4442C]" />
-            <span>CHAPTER 08 // TECHNICAL INQUIRIES & PEER REVIEW</span>
+            <span>CHAPTER 08 · PEER REVIEW PANEL</span>
           </div>
           <h2 className="font-editorial text-4xl sm:text-6xl font-normal tracking-tight leading-tight text-[#151410]">
             Technical inquiries & <br />
@@ -75,7 +75,7 @@ export default function VivaDefenseSection() {
                   <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#57534E] font-sans leading-relaxed border-t border-[#E5E1DC] bg-[#FAF8F5]">
                     <div className="pt-3 pl-4 border-l-2 border-[#E4442C] space-y-2">
                       <span className="text-[10px] font-mono-data text-[#E4442C] uppercase tracking-wider block font-bold">
-                        METHODOLOGICAL RATIONALE // TECHNICAL VERIFICATION
+                        METHODOLOGICAL RATIONALE · TECHNICAL VERIFICATION
                       </span>
                       <p className="text-[#2E2B27]">{item.a}</p>
                     </div>

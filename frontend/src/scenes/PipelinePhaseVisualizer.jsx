@@ -13,12 +13,12 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-[#E4442C] animate-pulse" />
           <span className="text-[#E4442C] font-bold uppercase tracking-wider text-[11px]">
-            {activePhase === 0 && 'PHASE 01 // DATA INGESTION & RAW FUNDUS'}
-            {activePhase === 1 && 'PHASE 02 // SPECTRAL GREEN-CHANNEL CLAHE'}
-            {activePhase === 2 && 'PHASE 03 // LATENT AUTOENCODER MANIFOLD'}
-            {activePhase === 3 && 'PHASE 04 // 4-QUBIT BLOCH PHASE STATE'}
-            {activePhase === 4 && 'PHASE 05 // STRONGLY ENTANGLING PQC'}
-            {activePhase === 5 && 'PHASE 06 // CRYOGENIC QPU HARDWARE EXECUTION'}
+            {activePhase === 0 && 'PHASE 01 · DATA INGESTION & RAW FUNDUS'}
+            {activePhase === 1 && 'PHASE 02 · SPECTRAL GREEN-CHANNEL CLAHE'}
+            {activePhase === 2 && 'PHASE 03 · LATENT AUTOENCODER MANIFOLD'}
+            {activePhase === 3 && 'PHASE 04 · 4-QUBIT BLOCH PHASE STATE'}
+            {activePhase === 4 && 'PHASE 05 · STRONGLY ENTANGLING PQC'}
+            {activePhase === 5 && 'PHASE 06 · CRYOGENIC QPU HARDWARE EXECUTION'}
           </span>
         </div>
         <span className="text-white/40 text-[10px] hidden sm:inline">
@@ -349,7 +349,7 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
 
       {/* Bottom Status Telemetry Footer */}
       <div className="flex items-center justify-between border-t border-white/10 pt-3 text-[10px] font-mono-data text-white/40">
-        <span>HQNN MEDICAL PIPELINE // SCIENTIFIC ARCHITECTURE</span>
+        <span>HQNN MEDICAL PIPELINE · SCIENTIFIC ARCHITECTURE</span>
         <span>PennyLane + Qiskit 2.6.2 · PyTorch Bridge</span>
       </div>
 
