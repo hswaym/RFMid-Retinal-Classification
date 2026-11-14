@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Lenis from 'lenis';
 
+import RetinalQuantumPreloader from './components/RetinalQuantumPreloader';
 import CustomCursor from './components/CustomCursor';
 import Navbar from './components/Navbar';
 import HeroTransformationJourney from './sections/HeroTransformationJourney';
@@ -14,6 +15,8 @@ import VivaDefenseSection from './sections/VivaDefenseSection';
 import Footer from './components/Footer';
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     // Lenis Smooth Scroll Initialization
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -42,7 +45,10 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-[#F2EEE9] text-[#151410] overflow-x-hidden selection:bg-[#E4442C] selection:text-white font-sans">
-      {/* Custom Crosshair / Pupil Cursor */}
+      {/* Retinal Quantum Optical Boot Calibration Animation */}
+      {isLoading && <RetinalQuantumPreloader onComplete={() => setIsLoading(false)} />}
+
+      {/* Custom Ophthalmic Eye Reticle Cursor */}
       <CustomCursor />
 
       {/* Slim Top Navigation Bar */}

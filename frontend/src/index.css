@@ -70,6 +70,12 @@
 }
 
 /* Custom Crosshair Cursor matching Figma */
+@media (hover: hover) and (pointer: fine) {
+  body, button, a, [role="button"], input, select, textarea {
+    cursor: none !important;
+  }
+}
+
 .custom-cursor-dot {
   pointer-events: none;
   position: fixed;
