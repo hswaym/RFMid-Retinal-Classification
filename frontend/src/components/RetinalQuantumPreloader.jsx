@@ -1,519 +1,543 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial, Trail } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-/* ─────────────────────────────────────────────
-   PROCEDURAL 3-D ANATOMICAL EYE
-   Built entirely with Three.js primitives —
-   no external .glb needed, works on Vercel.
-───────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   GLSL: Anatomical Iris Fragment Shader
+   - Radial fibre pattern via layered fbm noise
+   - Collarette ring, limbic arc, Purkinje specular
+   - Pupil with fundus red-reflex glow
+   - Progress-driven brightness reveal
+════════════════════════════════════════════════════════════ */
+const IRIS_VERT = /* glsl */`
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
 
-/** Sclera — the outer white of the eye */
-function Sclera() {
-  const ref = useRef();
-  useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.y += delta * 0.08;
+const IRIS_FRAG = /* glsl */`
+  precision highp float;
+  varying vec2 vUv;
+
+  uniform float uTime;
+  uniform float uPupilR;   // 0.60 → 0.18 (dilated → constricted)
+  uniform float uProgress; // 0.0 → 1.0
+
+  /* ── hash / noise ─────────────────────────── */
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  }
+
+  float smoothnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(hash(i),             hash(i + vec2(1.0, 0.0)), f.x),
+      mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), f.x),
+      f.y
+    );
+  }
+
+  /* layered fractal brownian motion */
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    vec2  shift = vec2(100.0);
+    mat2  rot   = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+    for (int i = 0; i < 6; i++) {
+      v += a * smoothnoise(p);
+      p  = rot * p * 2.1 + shift;
+      a *= 0.48;
+    }
+    return v;
+  }
+
+  void main() {
+    /* polar coords centred on disc */
+    vec2  uv  = vUv * 2.0 - 1.0;
+    float r   = length(uv);
+    float ang = atan(uv.y, uv.x);           /* -π … π  */
+    float angN = ang / 6.28318;             /* -0.5 … 0.5 */
+
+    if (r > 1.0) { discard; }
+
+    /* ── PUPIL ───────────────────────────────── */
+    if (r < uPupilR + 0.025) {
+      float edge    = smoothstep(uPupilR + 0.025, uPupilR, r);
+      /* fundus red-reflex warm glow deep in pupil */
+      float glow    = exp(-r * r / max(uPupilR * uPupilR * 0.4, 0.001));
+      vec3 pupilCol = mix(
+        vec3(0.012, 0.005, 0.003),
+        vec3(0.60, 0.10, 0.03) * uProgress,
+        glow * 0.55
+      );
+      gl_FragColor = vec4(pupilCol, edge);
+      return;
+    }
+
+    /* ── IRIS ────────────────────────────────── */
+    /* t = 0 at pupil edge, 1 at limbus */
+    float t = clamp((r - uPupilR) / (1.0 - uPupilR), 0.0, 1.0);
+
+    /* radial-fibre noise: angle & radius as uv */
+    vec2 fUV1  = vec2(angN * 22.0 + smoothnoise(vec2(r * 7.0, 0.5)) * 0.5, r * 9.0 + uTime * 0.003);
+    vec2 fUV2  = vec2(angN * 10.0 + 1.3,                                   r * 4.5 - uTime * 0.002);
+    float fine   = fbm(fUV1 * 1.5);
+    float coarse = fbm(fUV2 * 0.85);
+    float pattern = fine * 0.65 + coarse * 0.35;
+
+    /* color ramp — amber/hazel with project vermilion cast */
+    vec3 cInner  = vec3(0.42, 0.13, 0.025);   /* deep amber near pupil */
+    vec3 cMid    = vec3(0.70, 0.27, 0.055);   /* mid iris              */
+    vec3 cCollar = vec3(0.90, 0.33, 0.07);    /* collarette highlight  */
+    vec3 cLimbus = vec3(0.028, 0.010, 0.006); /* dark limbus           */
+
+    vec3 col = mix(cInner, cMid, smoothstep(0.0, 0.45, t));
+    /* collarette ring ~18 % from pupil edge */
+    float ring = exp(-pow((t - 0.18) * 11.0, 2.0));
+    col = mix(col, cCollar, ring * 0.75);
+    /* limbus darkening */
+    col = mix(col, cLimbus, smoothstep(0.58, 1.0, t));
+    /* fibre modulation */
+    col += pattern * vec3(0.20, 0.07, 0.015) - 0.03;
+    col  = clamp(col, 0.0, 1.0);
+
+    /* ── Purkinje corneal specular (bright crescent) ── */
+    vec2 s1 = uv - vec2(0.24, 0.30);
+    float spec1 = exp(-dot(s1, s1) * 32.0);
+    float spec2 = exp(-dot(s1 * 0.55, s1 * 0.55) * 11.0) * 0.28;
+    col = mix(col, vec3(1.0), clamp(spec1 + spec2, 0.0, 1.0) * 0.92);
+
+    /* secondary Purkinje image (smaller, opposite) */
+    vec2 s2  = uv - vec2(-0.14, -0.20);
+    float sp2 = exp(-dot(s2, s2) * 70.0);
+    col  = mix(col, vec3(1.0, 0.95, 0.90), sp2 * 0.38);
+
+    /* ── Progress-driven reveal ── */
+    float reveal = smoothstep(0.0, 0.35, uProgress);
+    col *= reveal;
+
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+/* ════════════════════════════════════════════════════════════
+   Three.js Scene Components
+════════════════════════════════════════════════════════════ */
+
+/** Sclera — the outer globe */
+function ScleraGlobe() {
+  const meshRef = useRef();
+  useFrame((_, dt) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += dt * 0.04;
+      meshRef.current.rotation.x += dt * 0.012;
+    }
   });
   return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[1.0, 64, 64]} />
+    <mesh ref={meshRef}>
+      <sphereGeometry args={[1.0, 72, 72]} />
       <meshStandardMaterial
-        color="#0e0a08"
-        roughness={0.15}
-        metalness={0.05}
-        transparent
-        opacity={0.92}
+        color="#ede8e0"
+        roughness={0.55}
+        metalness={0.0}
       />
     </mesh>
   );
 }
 
-/** Iris — ring of colour with radial fibre lines */
-function Iris({ progress }) {
-  const ref = useRef();
-  const irisRef = useRef();
+/** Iris disc with the GLSL anatomical shader */
+function IrisDisc({ progress }) {
+  const progRef = useRef(progress);
+  progRef.current = progress;
 
-  // Build custom iris geometry with radial lines baked into a texture
-  const irisTexture = useMemo(() => {
-    const size = 512;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    const cx = size / 2, cy = size / 2;
+  const mat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        vertexShader: IRIS_VERT,
+        fragmentShader: IRIS_FRAG,
+        uniforms: {
+          uTime:     { value: 0 },
+          uPupilR:   { value: 0.60 },
+          uProgress: { value: 0 },
+        },
+        transparent: false,
+        side: THREE.FrontSide,
+        depthWrite: true,
+      }),
+    []
+  );
 
-    // Deep background — dark amber
-    ctx.fillStyle = '#1a0d05';
-    ctx.fillRect(0, 0, size, size);
-
-    // Radial iris fibres
-    const numLines = 220;
-    for (let i = 0; i < numLines; i++) {
-      const angle = (i / numLines) * Math.PI * 2;
-      const r1 = size * 0.18 + Math.random() * size * 0.04;
-      const r2 = size * 0.48 + Math.random() * size * 0.04;
-      const alpha = 0.15 + Math.random() * 0.4;
-      const hue = 10 + Math.random() * 20; // orange-amber range
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1);
-      ctx.lineTo(cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2);
-      ctx.strokeStyle = `hsla(${hue}, 90%, 55%, ${alpha})`;
-      ctx.lineWidth = 0.6 + Math.random() * 1.1;
-      ctx.stroke();
-    }
-
-    // Collarette ring (the ridge around the pupil)
-    const gr = ctx.createRadialGradient(cx, cy, size * 0.17, cx, cy, size * 0.26);
-    gr.addColorStop(0, 'rgba(228,68,44,0.6)');
-    gr.addColorStop(1, 'rgba(180,40,10,0)');
-    ctx.fillStyle = gr;
-    ctx.beginPath();
-    ctx.arc(cx, cy, size * 0.26, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Limbic ring (dark edge of iris)
-    const limb = ctx.createRadialGradient(cx, cy, size * 0.42, cx, cy, size * 0.5);
-    limb.addColorStop(0, 'rgba(0,0,0,0)');
-    limb.addColorStop(1, 'rgba(0,0,0,0.85)');
-    ctx.fillStyle = limb;
-    ctx.beginPath();
-    ctx.arc(cx, cy, size * 0.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    const tex = new THREE.CanvasTexture(canvas);
-    return tex;
-  }, []);
-
-  // Pupil dilation: maps 0→100% progress to 0.18→0.42 radius factor
-  const pupilScale = 0.18 + (progress / 100) * 0.24;
-
-  useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.z -= delta * 0.12;
-    if (irisRef.current) irisRef.current.rotation.z += delta * 0.06;
+  useFrame(({ clock }) => {
+    mat.uniforms.uTime.value     = clock.elapsedTime;
+    mat.uniforms.uProgress.value = progRef.current;
+    /* pupil dilated (0.60) → constricted (0.18) */
+    mat.uniforms.uPupilR.value   = THREE.MathUtils.lerp(0.60, 0.18, progRef.current);
   });
 
   return (
-    <group ref={ref}>
-      {/* Iris disc */}
-      <mesh ref={irisRef} position={[0, 0, 0.72]} rotation={[0, 0, 0]}>
-        <circleGeometry args={[0.68, 128]} />
-        <meshStandardMaterial
-          map={irisTexture}
-          roughness={0.3}
-          metalness={0.1}
-          transparent
-          opacity={0.98}
-          side={THREE.FrontSide}
-        />
-      </mesh>
-
-      {/* Pupil (black circle that dilates) */}
-      <mesh position={[0, 0, 0.73]}>
-        <circleGeometry args={[pupilScale, 64]} />
-        <meshStandardMaterial
-          color="#000000"
-          roughness={1}
-          metalness={0}
-        />
-      </mesh>
-
-      {/* Corneal specular highlight — small white crescent */}
-      <mesh position={[0.14, 0.18, 0.74]}>
-        <circleGeometry args={[0.07, 32]} />
-        <meshStandardMaterial
-          color="#ffffff"
-          roughness={0}
-          metalness={0}
-          transparent
-          opacity={0.55}
-        />
-      </mesh>
-
-      {/* Sub-corneal reflex glow */}
-      <mesh position={[-0.08, -0.12, 0.74]}>
-        <circleGeometry args={[0.04, 32]} />
-        <meshStandardMaterial
-          color="#ffccaa"
-          roughness={0}
-          metalness={0}
-          transparent
-          opacity={0.3}
-        />
-      </mesh>
-    </group>
+    <mesh position={[0, 0, 0.705]} renderOrder={2}>
+      <circleGeometry args={[0.68, 128]} />
+      <primitive object={mat} attach="material" />
+    </mesh>
   );
 }
 
-/** Cornea — transparent dome over the iris */
-function Cornea() {
+/** Transparent cornea dome */
+function CorneaDome() {
   return (
-    <mesh position={[0, 0, 0.3]}>
-      <sphereGeometry args={[0.75, 64, 64, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+    <mesh position={[0, 0, 0.26]}>
+      <sphereGeometry args={[0.76, 64, 64, 0, Math.PI * 2, 0, Math.PI * 0.48]} />
       <meshPhysicalMaterial
-        color="#aaddff"
-        roughness={0}
-        metalness={0}
-        transmission={0.95}
-        transparent
-        opacity={0.18}
+        transmission={0.92}
+        roughness={0.0}
+        metalness={0.0}
         ior={1.376}
-        thickness={0.1}
+        thickness={0.08}
+        transparent
+        opacity={0.14}
         side={THREE.FrontSide}
+        depthWrite={false}
       />
     </mesh>
   );
 }
 
-/** Retinal fundus glow visible through pupil */
-function RetinalGlow({ progress }) {
-  const ref = useRef();
-  useFrame(({ clock }) => {
-    if (ref.current) {
-      ref.current.material.opacity = 0.3 + Math.sin(clock.elapsedTime * 1.8) * 0.15;
-    }
-  });
+/** Limbal ring — dark circle where iris meets sclera */
+function LimbalRing() {
   return (
-    <mesh ref={ref} position={[0, 0, 0.1]}>
-      <circleGeometry args={[0.16, 48]} />
+    <mesh position={[0, 0, 0.700]}>
+      <ringGeometry args={[0.665, 0.74, 128]} />
       <meshStandardMaterial
-        color="#E4442C"
-        emissive="#E4442C"
-        emissiveIntensity={2.5 + (progress / 100) * 2}
-        transparent
-        opacity={0.4}
+        color="#030100"
+        roughness={1}
+        side={THREE.FrontSide}
+        depthWrite
       />
     </mesh>
   );
 }
 
-/** Scan line sweeping across the iris — ophthalmic slit-lamp effect */
-function ScanLine({ progress }) {
-  const ref = useRef();
-  useFrame(({ clock }) => {
-    if (ref.current) {
-      ref.current.position.y = Math.sin(clock.elapsedTime * 2.1) * 0.6;
-      ref.current.material.opacity = 0.3 + Math.sin(clock.elapsedTime * 3) * 0.15;
-    }
-  });
-  return (
-    <mesh ref={ref} position={[0, 0, 0.75]}>
-      <planeGeometry args={[1.4, 0.008]} />
-      <meshStandardMaterial
-        color="#E4442C"
-        emissive="#E4442C"
-        emissiveIntensity={4}
-        transparent
-        opacity={0.35}
-      />
-    </mesh>
-  );
-}
-
-/** 4 Qubit orbital nodes that rotate around the eye */
-function QubitOrbit({ progress }) {
-  const groupRef = useRef();
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.6;
-      groupRef.current.rotation.x += delta * 0.15;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {[0, 1, 2, 3].map((q) => {
-        const angle = (q / 4) * Math.PI * 2;
-        const r = 1.55;
-        const x = Math.cos(angle) * r;
-        const z = Math.sin(angle) * r;
-        return (
-          <group key={q} position={[x, 0, z]}>
-            {/* Node sphere */}
-            <mesh>
-              <sphereGeometry args={[0.055, 16, 16]} />
-              <meshStandardMaterial
-                color="#E4442C"
-                emissive="#E4442C"
-                emissiveIntensity={3}
-                roughness={0.2}
-                metalness={0.5}
-              />
-            </mesh>
-            {/* Connecting arc stub */}
-            <mesh rotation={[0, angle, 0]}>
-              <torusGeometry args={[r, 0.003, 8, 60, Math.PI / 4]} />
-              <meshStandardMaterial
-                color="#E4442C"
-                emissive="#E4442C"
-                emissiveIntensity={1.5}
-                transparent
-                opacity={0.5}
-              />
-            </mesh>
-          </group>
-        );
-      })}
-    </group>
-  );
-}
-
-/** Outer orbit ring — dashed quantum circuit ring */
-function OrbitRing() {
-  const ref = useRef();
-  useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.z += delta * 0.25;
-  });
-  return (
-    <mesh ref={ref}>
-      <torusGeometry args={[1.55, 0.004, 4, 120]} />
-      <meshStandardMaterial
-        color="#E4442C"
-        emissive="#E4442C"
-        emissiveIntensity={1.2}
-        transparent
-        opacity={0.4}
-      />
-    </mesh>
-  );
-}
-
-/** Secondary outer ring counter-rotating */
-function OuterRing2() {
-  const ref = useRef();
-  useFrame((_, delta) => {
-    if (ref.current) {
-      ref.current.rotation.z -= delta * 0.12;
-      ref.current.rotation.x += delta * 0.08;
-    }
-  });
-  return (
-    <mesh ref={ref}>
-      <torusGeometry args={[1.9, 0.003, 4, 100]} />
-      <meshStandardMaterial
-        color="#ffffff"
-        transparent
-        opacity={0.08}
-      />
-    </mesh>
-  );
-}
-
-/** Camera gentle auto-orbit */
-function CameraRig() {
-  useFrame(({ camera, clock }) => {
-    camera.position.x = Math.sin(clock.elapsedTime * 0.18) * 0.4;
-    camera.position.y = Math.sin(clock.elapsedTime * 0.11) * 0.2;
-    camera.lookAt(0, 0, 0);
-  });
-  return null;
-}
-
-/** Full 3-D scene */
-function EyeScene({ progress }) {
+/** Static 3-point clinical lighting */
+function Lighting() {
   return (
     <>
-      <CameraRig />
-
-      {/* Lighting — warm clinical key + cool rim + ambient */}
-      <ambientLight intensity={0.15} color="#1a0a05" />
-      <pointLight position={[3, 3, 4]} intensity={4} color="#ff6644" />
-      <pointLight position={[-4, -2, 3]} intensity={2} color="#2255ff" />
-      <spotLight
-        position={[0, 0, 5]}
-        angle={0.35}
-        penumbra={0.6}
-        intensity={8}
-        color="#ffffff"
-        castShadow={false}
-      />
-      <pointLight position={[0, 0, -4]} intensity={1.5} color="#E4442C" />
-
-      {/* Eye geometry stack */}
-      <Sclera />
-      <RetinalGlow progress={progress} />
-      <Iris progress={progress} />
-      <Cornea />
-      <ScanLine progress={progress} />
-
-      {/* Quantum orbit elements */}
-      <OrbitRing />
-      <OuterRing2 />
-      <QubitOrbit progress={progress} />
+      {/* warm key — front-right-top */}
+      <directionalLight position={[2.5, 2.5, 5]} intensity={5.5} color="#fff4ee" />
+      {/* cool fill — left */}
+      <pointLight position={[-4, 1, 2]} intensity={1.8} color="#6688dd" />
+      {/* vermilion rim — back */}
+      <pointLight position={[0, -1, -3]} intensity={2.2} color="#E4442C" />
+      {/* low ambient */}
+      <ambientLight intensity={0.09} color="#150a06" />
     </>
   );
 }
 
-/* ─────────────────────────────────────────────
-   BOOT LOG HUD
-───────────────────────────────────────────── */
-const BOOT_LOGS = [
-  { text: 'OPHTHALMIC SENSOR ALIGNMENT (BEN GRAHAM FOV)', code: 'FOV_224x224_OK' },
-  { text: 'GREEN-CHANNEL CLAHE 540–575nm FILTER', code: 'CLAHE_CLIP_2.0' },
-  { text: 'AUTOENCODER MANIFOLD COMPRESSION (512→4D)', code: 'LATENT_4D_NORM' },
-  { text: 'PENNYLANE QNODE PARAMETER-SHIFT ENGINE', code: 'QNODE_READY' },
-  { text: 'QPU NOISE GATE CALIBRATION (15 mK CRYOGENIC)', code: 'QPU_STABLE' },
+function EyeScene({ progress }) {
+  return (
+    <>
+      <Lighting />
+      <ScleraGlobe />
+      <LimbalRing />
+      <IrisDisc progress={progress} />
+      <CorneaDome />
+    </>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   Boot telemetry lines
+════════════════════════════════════════════════════════════ */
+const LOGS = [
+  { pct: 0,  text: 'OPHTHALMIC SENSOR ALIGNMENT',       code: 'FOV_224x224' },
+  { pct: 20, text: 'GREEN-CHANNEL CLAHE 540–575 nm',    code: 'CLAHE_2.0'  },
+  { pct: 40, text: 'AUTOENCODER MANIFOLD 512 → 4-DIM',  code: 'LATENT_OK'  },
+  { pct: 62, text: 'PENNYLANE QNODE PARAMETER-SHIFT',   code: 'QNODE_READY' },
+  { pct: 82, text: 'CRYOGENIC QPU GATE VALIDATION 15 mK', code: 'QPU_STABLE' },
 ];
 
-/* ─────────────────────────────────────────────
-   MAIN PRELOADER EXPORT
-───────────────────────────────────────────── */
+function currentLog(pct) {
+  for (let i = LOGS.length - 1; i >= 0; i--) {
+    if (pct >= LOGS[i].pct) return LOGS[i];
+  }
+  return LOGS[0];
+}
+
+/* ════════════════════════════════════════════════════════════
+   Main Export
+════════════════════════════════════════════════════════════ */
 export default function RetinalQuantumPreloader({ onComplete }) {
   const [progress, setProgress] = useState(0);
-  const [bootPhase, setBootPhase] = useState(0);
-  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [out, setOut] = useState(false);
 
   useEffect(() => {
-    const startTime = Date.now();
-    const duration = 3200; // 3.2 s — gives eye time to render beautifully
-
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.min(100, Math.floor((elapsed / duration) * 100));
-      setProgress(pct);
-      if (pct < 20) setBootPhase(0);
-      else if (pct < 40) setBootPhase(1);
-      else if (pct < 62) setBootPhase(2);
-      else if (pct < 84) setBootPhase(3);
-      else setBootPhase(4);
-
-      if (pct >= 100) {
-        clearInterval(interval);
+    const t0 = Date.now();
+    const dur = 3800; // ms — gives shader time to render beautifully
+    const id = setInterval(() => {
+      const p = Math.min(1, (Date.now() - t0) / dur);
+      setProgress(p);
+      if (p >= 1) {
+        clearInterval(id);
         setTimeout(() => {
-          setIsFadingOut(true);
-          setTimeout(() => { if (onComplete) onComplete(); }, 700);
-        }, 400);
+          setOut(true);
+          setTimeout(() => { if (onComplete) onComplete(); }, 800);
+        }, 500);
       }
-    }, 25);
-
-    return () => clearInterval(interval);
+    }, 20);
+    return () => clearInterval(id);
   }, [onComplete]);
 
-  const handleSkip = () => {
-    setIsFadingOut(true);
-    setTimeout(() => { if (onComplete) onComplete(); }, 350);
+  const skip = () => {
+    setOut(true);
+    setTimeout(() => { if (onComplete) onComplete(); }, 400);
   };
+
+  const pct  = Math.round(progress * 100);
+  const log  = currentLog(pct);
+  /* iris-opening clip: eye reveals itself as a circle expanding */
+  const clip = `circle(${(progress * 52 + 2).toFixed(1)}% at 50% 50%)`;
 
   return (
     <div
-      className={`fixed inset-0 z-[99999] bg-[#080605] text-white flex flex-col items-center justify-center select-none transition-all duration-700 ease-in-out ${
-        isFadingOut ? 'opacity-0 scale-[1.04] pointer-events-none' : 'opacity-100 scale-100'
-      }`}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 99999,
+        background: '#070504',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        userSelect: 'none',
+        transition: 'opacity 0.8s ease, transform 0.8s ease',
+        opacity: out ? 0 : 1,
+        transform: out ? 'scale(1.03)' : 'scale(1)',
+        pointerEvents: out ? 'none' : 'auto',
+        fontFamily: 'var(--font-mono-data, "JetBrains Mono", monospace)',
+      }}
     >
-      {/* Deep radial vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(228,68,44,0.07)_0%,rgba(8,6,5,1)_72%)] pointer-events-none" />
+      {/* ── ambient vignette ── */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 60% 55% at 50% 48%, rgba(228,68,44,0.06) 0%, #070504 68%)',
+      }} />
 
-      {/* ── TOP HEADER ── */}
-      <div className="absolute top-6 left-6 right-6 flex items-center justify-between font-mono-data text-[11px] tracking-widest border-b border-white/[0.07] pb-3">
-        <div className="flex items-center space-x-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#E4442C] animate-pulse" />
-          <span className="text-white/70 font-semibold uppercase">HQNN QUANTUM RETINA</span>
-          <span className="text-white/20">·</span>
-          <span className="text-[#E4442C]/80 uppercase">Optical Boot Sequence</span>
+      {/* ── TOP BAR ─────────────────────────────── */}
+      <div style={{
+        position: 'absolute', top: 24, left: 24, right: 24,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '1px solid rgba(255,255,255,0.055)',
+        paddingBottom: 12,
+        fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
+        color: 'rgba(255,255,255,0.4)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#E4442C',
+            boxShadow: '0 0 8px rgba(228,68,44,0.9)',
+            animation: 'pulse 1.4s ease-in-out infinite',
+          }} />
+          <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>
+            HQNN Quantum Retina
+          </span>
+          <span style={{ color: 'rgba(255,255,255,0.18)' }}>·</span>
+          <span style={{ color: 'rgba(228,68,44,0.7)' }}>Optical Boot Sequence</span>
         </div>
         <button
-          onClick={handleSkip}
-          className="text-[10px] uppercase tracking-wider text-white/25 hover:text-white/70 transition-colors px-2.5 py-1 border border-white/[0.08] rounded hover:border-white/25"
+          onClick={skip}
+          style={{
+            background: 'none', border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: '0.15em',
+            textTransform: 'uppercase', padding: '4px 10px', borderRadius: 4,
+            cursor: 'pointer',
+            transition: 'color 0.2s, border-color 0.2s',
+          }}
+          onMouseEnter={e => { e.target.style.color='rgba(255,255,255,0.8)'; e.target.style.borderColor='rgba(255,255,255,0.3)'; }}
+          onMouseLeave={e => { e.target.style.color='rgba(255,255,255,0.3)'; e.target.style.borderColor='rgba(255,255,255,0.1)'; }}
         >
           Skip
         </button>
       </div>
 
-      {/* ── 3-D EYE CANVAS ── */}
-      <div className="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px]">
-        {/* Subtle ambient halo behind the canvas */}
-        <div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, rgba(228,68,44,${0.04 + (progress / 100) * 0.14}) 0%, transparent 70%)`,
-          }}
-        />
-        <Canvas
-          camera={{ position: [0, 0, 3.6], fov: 42 }}
-          dpr={[1, 1.5]}
-          gl={{ antialias: true, alpha: true }}
-          style={{ background: 'transparent' }}
-        >
-          <EyeScene progress={progress} />
-        </Canvas>
-      </div>
+      {/* ── 3-D EYE ─────────────────────────────── */}
+      <div style={{
+        width: 'min(380px, 72vw)',
+        height: 'min(380px, 72vw)',
+        position: 'relative',
+        marginBottom: 32,
+      }}>
+        {/* subtle halo behind canvas — grows with progress */}
+        <div style={{
+          position: 'absolute', inset: -20,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, rgba(228,68,44,${(progress * 0.18).toFixed(3)}) 0%, transparent 68%)`,
+          filter: 'blur(28px)',
+          pointerEvents: 'none',
+          transition: 'background 0.4s',
+        }} />
 
-      {/* ── PROGRESS HUD ── */}
-      <div className="mt-6 w-full max-w-xs sm:max-w-sm px-6 space-y-3.5 font-mono-data">
-
-        {/* Percentage + label */}
-        <div className="flex items-baseline justify-between">
-          <span className="text-[10px] uppercase tracking-widest text-white/40">
-            Calibrating Retina → Quantum Circuit
-          </span>
-          <span
-            className="text-3xl font-bold tabular-nums"
-            style={{ color: `hsl(${10 + (progress / 100) * 110}, 85%, 58%)` }}
+        {/* iris-opening clip mask */}
+        <div style={{
+          width: '100%', height: '100%',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          clipPath: clip,
+          transition: 'clip-path 0.15s ease-out',
+        }}>
+          <Canvas
+            camera={{ position: [0, 0, 3.0], fov: 44 }}
+            dpr={[1, 1.6]}
+            gl={{ antialias: true, alpha: true }}
+            style={{ background: 'transparent', width: '100%', height: '100%' }}
           >
-            {progress.toString().padStart(3, '0')}
-            <span className="text-sm font-normal text-white/40 ml-0.5">%</span>
+            <EyeScene progress={progress} />
+          </Canvas>
+        </div>
+
+        {/* thin precise ring around the eye */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          borderRadius: '50%',
+          border: `1px solid rgba(228,68,44,${(progress * 0.4).toFixed(3)})`,
+          pointerEvents: 'none',
+          transition: 'border-color 0.3s',
+        }} />
+
+        {/* 4 compass tick marks */}
+        {['top', 'right', 'bottom', 'left'].map((dir) => {
+          const styles = {
+            top:    { top: -6, left: '50%', transform: 'translateX(-50%)', width: 1, height: 12 },
+            bottom: { bottom: -6, left: '50%', transform: 'translateX(-50%)', width: 1, height: 12 },
+            left:   { left: -6, top: '50%', transform: 'translateY(-50%)', height: 1, width: 12 },
+            right:  { right: -6, top: '50%', transform: 'translateY(-50%)', height: 1, width: 12 },
+          };
+          return (
+            <div key={dir} style={{
+              position: 'absolute',
+              background: `rgba(228,68,44,${(progress * 0.6).toFixed(3)})`,
+              ...styles[dir],
+            }} />
+          );
+        })}
+      </div>
+
+      {/* ── HUD BELOW EYE ───────────────────────── */}
+      <div style={{
+        width: 'min(360px, 86vw)',
+        display: 'flex', flexDirection: 'column', gap: 14,
+      }}>
+
+        {/* big percentage + label */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-end',
+          justifyContent: 'space-between',
+        }}>
+          {/* editorial counter */}
+          <div>
+            <div style={{
+              fontFamily: 'var(--font-editorial, Georgia, serif)',
+              fontSize: 'clamp(52px, 10vw, 80px)',
+              fontWeight: 300,
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
+              color: `hsl(${8 + progress * 110}, 85%, ${52 + progress * 12}%)`,
+              fontVariantNumeric: 'tabular-nums',
+              transition: 'color 0.2s',
+            }}>
+              {pct.toString().padStart(3, '0')}
+            </div>
+            <div style={{
+              fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.3)', marginTop: 4,
+            }}>
+              Scan Protocol Initialising
+            </div>
+          </div>
+
+          {/* qubit phase dots */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, alignItems: 'flex-end', paddingBottom: 6 }}>
+            {[0, 1, 2, 3].map(q => {
+              const active = pct >= q * 25;
+              return (
+                <div key={q} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 8, letterSpacing: '0.12em', color: active ? 'rgba(228,68,44,0.75)' : 'rgba(255,255,255,0.15)' }}>
+                    q{q}
+                  </span>
+                  <div style={{
+                    width: 20, height: 2, borderRadius: 1,
+                    background: active ? '#E4442C' : 'rgba(255,255,255,0.08)',
+                    boxShadow: active ? '0 0 5px rgba(228,68,44,0.6)' : 'none',
+                    transition: 'background 0.3s, box-shadow 0.3s',
+                  }} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* progress track */}
+        <div style={{
+          position: 'relative', height: 2,
+          background: 'rgba(255,255,255,0.07)',
+          borderRadius: 1, overflow: 'visible',
+        }}>
+          <div style={{
+            position: 'absolute', left: 0, top: 0, height: '100%',
+            width: `${pct}%`,
+            background: `linear-gradient(90deg, #1F5D3A ${Math.max(0, 50 - pct)}%, #E4442C 80%, #ff9966 100%)`,
+            borderRadius: 1,
+            boxShadow: '0 0 8px rgba(228,68,44,0.65)',
+            transition: 'width 0.08s linear',
+          }} />
+          {/* gleam */}
+          <div style={{
+            position: 'absolute', top: -3, height: 8, width: 24,
+            left: `${Math.max(0, pct - 6)}%`,
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
+            transition: 'left 0.1s linear',
+          }} />
+        </div>
+
+        {/* current boot log */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          fontSize: 10, letterSpacing: '0.12em',
+          color: 'rgba(255,255,255,0.4)',
+          height: 18,
+        }}>
+          <span style={{ color: '#E4442C', fontSize: 7 }}>▶</span>
+          <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {log.text}
           </span>
-        </div>
-
-        {/* Progress track */}
-        <div className="relative h-[3px] bg-white/[0.07] rounded-full overflow-hidden">
-          <div
-            className="absolute left-0 top-0 h-full rounded-full transition-all duration-75"
-            style={{
-              width: `${progress}%`,
-              background: `linear-gradient(90deg, #1F5D3A ${Math.max(0, 50 - progress)}%, #E4442C 80%, #ff9977 100%)`,
-              boxShadow: '0 0 10px rgba(228,68,44,0.7)',
-            }}
-          />
-          {/* Moving gleam */}
-          <div
-            className="absolute top-0 h-full w-8 rounded-full"
-            style={{
-              left: `${Math.max(0, progress - 8)}%`,
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-              transition: 'left 0.08s linear',
-            }}
-          />
-        </div>
-
-        {/* Boot log line */}
-        <div className="flex items-center space-x-2 text-[10px] text-white/50 h-5">
-          <span className="text-[#E4442C] text-[8px]">▶</span>
-          <span className="truncate tracking-wide">{BOOT_LOGS[bootPhase].text}</span>
-          <span className="ml-auto flex-shrink-0 text-[9px] text-[#1F5D3A] border border-[#1F5D3A]/30 bg-[#1F5D3A]/10 px-1.5 py-0.5 rounded">
-            {BOOT_LOGS[bootPhase].code}
+          <span style={{
+            fontSize: 8, color: '#1F5D3A',
+            border: '1px solid rgba(31,93,58,0.35)',
+            background: 'rgba(31,93,58,0.12)',
+            padding: '1px 5px', borderRadius: 2, flexShrink: 0,
+          }}>
+            {log.code}
           </span>
-        </div>
-
-        {/* 4 qubit segment indicators */}
-        <div className="flex gap-1.5 pt-1">
-          {[0, 1, 2, 3].map((q) => {
-            const filled = progress >= (q + 1) * 25;
-            const active = progress >= q * 25 && progress < (q + 1) * 25;
-            return (
-              <div key={q} className="flex-1 space-y-1">
-                <div
-                  className="h-[2px] rounded-full transition-all duration-300"
-                  style={{
-                    background: filled
-                      ? '#E4442C'
-                      : active
-                      ? 'rgba(228,68,44,0.5)'
-                      : 'rgba(255,255,255,0.08)',
-                    boxShadow: filled ? '0 0 6px rgba(228,68,44,0.6)' : 'none',
-                  }}
-                />
-                <div className="text-[8px] text-white/25 text-center tracking-widest">q{q}</div>
-              </div>
-            );
-          })}
         </div>
       </div>
 
-      {/* ── BOTTOM CITATION ── */}
-      <div className="absolute bottom-5 left-0 right-0 text-center text-[9px] font-mono-data text-white/20 tracking-widest uppercase">
+      {/* ── BOTTOM CITATION ─────────────────────── */}
+      <div style={{
+        position: 'absolute', bottom: 20, left: 0, right: 0,
+        textAlign: 'center', fontSize: 9,
+        letterSpacing: '0.20em', textTransform: 'uppercase',
+        color: 'rgba(255,255,255,0.14)',
+      }}>
         APTOS 2019 · 4-QUBIT AUTOENCODER PQC · IBM MARRAKESH 156-QUBIT HERON
       </div>
+
+      {/* ── Keyframe for pulse dot ── */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 }
