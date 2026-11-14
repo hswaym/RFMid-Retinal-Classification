@@ -7,7 +7,7 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
 
   return (
     <div className="w-full h-full min-h-[460px] bg-[#151410] text-[#F2EEE9] rounded-2xl relative overflow-hidden flex flex-col justify-between p-6 select-none">
-      
+
       {/* Top Telemetry Header */}
       <div className="flex items-center justify-between border-b border-white/10 pb-3 text-xs font-mono-data">
         <div className="flex items-center space-x-2">
@@ -43,7 +43,7 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
                 alt="Raw Retinal Fundus Scan"
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Anatomical Callout Markers */}
               <div className="absolute top-[48%] left-[62%] -translate-x-1/2 -translate-y-1/2 flex items-center space-x-1.5 group cursor-pointer">
                 <span className="w-3 h-3 rounded-full bg-[#EAB308] border-2 border-white animate-ping" />
@@ -147,7 +147,7 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
         {activePhase === 2 && (
           <div className="w-full max-w-lg space-y-4 font-mono-data text-xs">
             <div className="grid grid-cols-4 gap-2.5 text-center items-center">
-              
+
               <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
                 <span className="text-[9px] text-white/40 block">BACKBONE</span>
                 <span className="text-base font-bold text-white block mt-1">512</span>
@@ -180,8 +180,8 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
                 <span className="text-[#1F5D3A] font-semibold">MSE: 0.0381</span>
               </div>
               <p className="text-[11px] text-white/60 font-sans leading-relaxed">
-                Standard statistical PCA failed (QWK 0.1379) because lesions occupy &lt;1% of global image variance. 
-                Our deep autoencoder non-linearly compresses 512 CNN activations into a 4D manifold, 
+                Standard statistical PCA failed (QWK 0.1379) because lesions occupy &lt;1% of global image variance.
+                Our deep autoencoder non-linearly compresses 512 CNN activations into a 4D manifold,
                 preserving microvascular pathology for quantum encoding.
               </p>
               <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px] text-white/40">
@@ -244,7 +244,7 @@ export default function PipelinePhaseVisualizer({ activePhase = 0 }) {
                     {/* Wire line */}
                     <line x1="35" y1={y} x2="430" y2={y} stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
                     {/* Qubit label */}
-                    <text x="15" y={y + 4} fill="rgba(255,255,255,0.8)" fontSize="10" fontFamily="monospace">q{['₀','₁','₂','₃'][i]}</text>
+                    <text x="15" y={y + 4} fill="rgba(255,255,255,0.8)" fontSize="10" fontFamily="monospace">q{['₀', '₁', '₂', '₃'][i]}</text>
                     {/* Ry angle embedding */}
                     <rect x="50" y={y - 10} width="44" height="20" rx="3" fill="#151410" stroke="#E4442C" strokeWidth="1.5" />
                     <text x="72" y={y + 4} fill="#E4442C" fontSize="8" textAnchor="middle" fontFamily="monospace">Ry(θ{i})</text>
