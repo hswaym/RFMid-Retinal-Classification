@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Cpu, ShieldCheck, Layers, CheckCircle2, Award, Terminal, Cloud, Key, Check, AlertCircle, RefreshCw } from 'lucide-react';
+import InteractiveBlochDecoherence from '../components/InteractiveBlochDecoherence';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -311,33 +312,9 @@ export default function HardwareRoadmapSection() {
                 </div>
               </div>
 
-              {/* Visual Bloch Coherence Dispersion (Near-Black 3D Canvas Box) */}
-              <div className="lg:col-span-7 bg-[#0B0C0E] p-6 rounded-2xl border border-[#151410] text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[260px] shadow-md">
-                <div className="text-xs font-mono-data text-white/60 mb-4">
-                  BLOCH STATE VECTOR COHERENCE DISPERSION UNDER NOISE
-                </div>
-
-                <div className="relative w-44 h-44 rounded-full border border-white/20 flex items-center justify-center">
-                  {[0, 1, 2, 3].map((i) => {
-                    const baseAngle = (i * Math.PI) / 2 + 0.4;
-                    return (
-                      <div
-                        key={i}
-                        className="absolute w-1 h-20 bg-gradient-to-t from-transparent via-[#E4442C] to-white rounded-full origin-bottom transition-all duration-200"
-                        style={{
-                          transform: `rotate(${baseAngle + (Math.random() - 0.5) * noiseP * 3}rad)`,
-                          filter: `blur(${vectorBlur}px)`,
-                          opacity: Math.max(0.35, 1 - noiseP * 8),
-                        }}
-                      />
-                    );
-                  })}
-                  <div className="w-3 h-3 rounded-full bg-white z-10 shadow-sm" />
-                </div>
-
-                <span className="text-[10px] font-mono-data text-white/50 mt-4">
-                  State Vector Blurring: {vectorBlur.toFixed(1)}px variance under depolarizing channel E(ρ)
-                </span>
+              {/* Visual Bloch Coherence Dispersion (Interactive 3D Decoherence Engine) */}
+              <div className="lg:col-span-7">
+                <InteractiveBlochDecoherence noiseP={noiseP} />
               </div>
             </div>
           ) : (
